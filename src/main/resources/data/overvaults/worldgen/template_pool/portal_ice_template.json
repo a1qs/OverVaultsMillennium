@@ -1,0 +1,47 @@
+{
+
+  // This is the name of the template pool itself.
+  "name": "overvaults:portal_ice_template",
+
+  "fallback": "minecraft:empty",
+
+  "elements": [
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal3_ruin0",
+        "processors": "overvaults:portal_ice_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 10,
+      "element": {
+        "location": "overvaults:portal3_ruin1",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 10,
+      "element": {
+        "location": "overvaults:portal3_ruin2",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 10,
+      "element": {
+        "location": "overvaults:portal3_ruin3",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    }
+
+  ]
+}

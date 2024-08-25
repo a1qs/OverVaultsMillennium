@@ -1,0 +1,73 @@
+{
+  "display": {
+    "icon": {
+      "item": "the_vault:vault_stone"
+    },
+    "title":  "Ancient Gateways",
+    "description": "Find a ruined vault portal",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png"
+  },
+  "criteria": {
+    "requirementA": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "overvaults:portal"
+        }
+      }
+    },
+    "requirementB": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "overvaults:portal_leafy"
+        }
+      }
+    },
+    "requirementC": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "overvaults:portal_desert"
+        }
+      }
+    },
+    "requirementD": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "overvaults:portal_red_desert"
+        }
+      }
+    },
+    "requirementE": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "overvaults:portal_snow"
+        }
+      }
+    },
+    "requirementF": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "location": {
+          "feature": "overvaults:portal_ice"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "requirementA",
+      "requirementB",
+      "requirementC",
+      "requirementD",
+      "requirementE",
+      "requirementF"
+    ]
+  ]
+
+}

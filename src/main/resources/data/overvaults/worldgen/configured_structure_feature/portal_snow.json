@@ -1,0 +1,27 @@
+{
+  "type": "overvaults:vault_portal_structures",
+
+  "config": {
+    "start_pool": "overvaults:portal_snow_template",
+    "size": 1
+  },
+
+  "biomes": "#overvaults:has_structure/portal_snow",
+
+//  "terrain_adaptation": "beard_thin",
+  "adapt_noise": true,
+
+  "spawn_overrides": {
+    "creature": {
+      "bounding_box": "piece",
+      "spawns": [
+        {
+          "type": "the_vault:vault_fighter",
+          "weight": 1,
+          "minCount": 1,
+          "maxCount": 1
+        }
+      ]
+    }
+  }
+}

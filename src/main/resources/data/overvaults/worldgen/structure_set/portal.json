@@ -1,0 +1,41 @@
+{
+
+  "structures": [
+    {
+      "structure": "overvaults:portal",
+      "weight": 1
+    },
+    {
+      "structure": "overvaults:portal_leafy",
+      "weight": 1
+    },
+    {
+      "structure": "overvaults:portal_desert",
+      "weight": 1
+    },
+    {
+      "structure": "overvaults:portal_red_desert",
+      "weight": 1
+    },
+    {
+      "structure": "overvaults:portal_snow",
+      "weight": 1
+    },
+    {
+      "structure": "overvaults:portal_ice",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 1234570,
+
+    // The average distance apart in chunks for spawn attempts
+    "spacing": 20,
+
+    // Minimum distance apart in chunks for spawn attempts
+    "separation": 12,
+
+    "type": "minecraft:random_spread"
+  }
+}

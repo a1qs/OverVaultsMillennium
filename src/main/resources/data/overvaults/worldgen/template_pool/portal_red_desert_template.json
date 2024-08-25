@@ -1,0 +1,84 @@
+{
+
+  // This is the name of the template pool itself.
+  "name": "overvaults:portal_red_desert_template",
+
+  "fallback": "minecraft:empty",
+
+  "elements": [
+    {
+      "weight": 2,
+      "element": {
+        "location": "overvaults:portal1_mesa_ruin0",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal1_mesa_ruin1",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal1_mesa_ruin2",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal1_mesa_ruin3",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+
+    {
+      "weight": 2,
+      "element": {
+        "location": "overvaults:portal2_mesa_ruin0",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal2_mesa_ruin1",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal2_mesa_ruin2",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal2_mesa_ruin3",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    }
+
+  ]
+}

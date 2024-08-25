@@ -1,0 +1,1 @@
+give @s the_vault:vault_gold 1

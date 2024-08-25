@@ -1,0 +1,84 @@
+{
+
+  // This is the name of the template pool itself.
+  "name": "overvaults:portal_leafy_template",
+
+  "fallback": "minecraft:empty",
+
+  "elements": [
+    {
+      "weight": 2,
+      "element": {
+        "location": "overvaults:portal1_leafy_ruin0",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal1_leafy_ruin1",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal1_leafy_ruin2",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal1_leafy_ruin3",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+
+    {
+      "weight": 2,
+      "element": {
+        "location": "overvaults:portal2_leafy_ruin0",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal2_leafy_ruin1",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal2_leafy_ruin2",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    },
+    {
+      "weight": 1,
+      "element": {
+        "location": "overvaults:portal2_leafy_ruin3",
+        "processors": "overvaults:portal_leafy_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      } 
+    }
+
+  ]
+}

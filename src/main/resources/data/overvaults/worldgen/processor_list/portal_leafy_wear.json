@@ -1,0 +1,134 @@
+{
+  "processors": [
+    {
+      "processor_type": "minecraft:rule",
+      "rules": [
+
+        //Vault Stone Replacements
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "the_vault:vault_stone",
+            "probability": 0.05
+          },
+          "output_state": {
+            "Name": "the_vault:chromatic_iron_ore"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "the_vault:vault_stone",
+            "probability": 0.15
+          },
+          "output_state": {
+            "Name": "minecraft:moss_block"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "the_vault:vault_stone",
+            "probability": 0.1
+          },
+          "output_state": {
+            "Name": "the_vault:vault_cobblestone"
+          }
+        },
+
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "the_vault:vault_stone",
+            "probability": 0.1
+          },
+          "output_state": {
+            "Name": "the_vault:vault_stone_bricks_cracked"
+          }
+        },
+
+
+
+
+
+
+
+
+        //Portal Polished Stone Replacements
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "the_vault:polished_vault_stone",
+            "probability": 0.1
+          },
+          "output_state": {
+            "Name": "the_vault:vault_stone_bricks"
+          }
+        },
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "the_vault:polished_vault_stone",
+            "probability": 0.1
+          },
+          "output_state": {
+            "Name": "the_vault:vault_stone_bricks_cracked"
+          }
+        },
+
+
+
+
+        //Chromatic Iron block Replacements
+
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "the_vault:chromatic_iron_block",
+            "probability": 0.5
+          },
+          "output_state": {
+            "Name": "the_vault:bumbo_polished_vault_stone"
+          }
+        },
+
+        //Crystal Pedestal Replacements
+
+        {
+          "location_predicate": {
+            "predicate_type": "minecraft:always_true"
+          },
+          "input_predicate": {
+            "predicate_type": "minecraft:random_block_match",
+            "block": "supplementaries:pedestal",
+            "probability": 0.70
+          },
+          "output_state": {
+            "Name": "minecraft:air"
+          }
+        }
+      ]
+    }
+  ]
+}
