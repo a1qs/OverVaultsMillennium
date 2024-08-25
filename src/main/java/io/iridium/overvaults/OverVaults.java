@@ -6,8 +6,14 @@ import io.iridium.overvaults.world.structure.ModStructures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -26,6 +32,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 @Mod(OverVaults.MOD_ID)
@@ -56,8 +66,8 @@ public class OverVaults {
     public static class OverVaultsEventHandler {
 
 
-        public static String vaultStoneBlock = "the_vault:polished_vault_stone";
         public static String vaultFighterEntity = "the_vault:vault_fighter_5";
+//        public static String vaultFighterEntity = "minecraft:zombie";
 
 
         @SubscribeEvent
@@ -65,57 +75,70 @@ public class OverVaults {
             if (event.getAdvancement().getId().equals(new ResourceLocation("overvaults:exploration/root"))) {
                 ServerLevel serverWorld = (ServerLevel) event.getPlayer().level;
                 BlockPos pos = event.getPlayer().blockPosition();
-                event.getPlayer().sendMessage(new TextComponent("send kelp").withStyle(ChatFormatting.OBFUSCATED).withStyle(ChatFormatting.RED), event.getPlayer().getUUID());
-                event.getPlayer().sendMessage(new TextComponent("You think you can succeed? Where even I have failed?").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), event.getPlayer().getUUID());
 
+                List<Block> blocksToSearch = new ArrayList<>();
+                blocksToSearch.add(Registry.BLOCK.get(new ResourceLocation("the_vault:chiseled_vault_stone")));
+                blocksToSearch.add(Registry.BLOCK.get(new ResourceLocation("the_vault:chromatic_iron_block")));
+                blocksToSearch.add(Registry.BLOCK.get(new ResourceLocation("the_vault:bumbo_polished_vault_stone")));
+//                blocksToSearch.add(Registry.BLOCK.get(new ResourceLocation("minecraft:deepslate_brick_wall")));
+//                blocksToSearch.add(Registry.BLOCK.get(new ResourceLocation("minecraft:polished_blackstone_bricks")));
+//                blocksToSearch.add(Registry.BLOCK.get(new ResourceLocation("minecraft:deepslate_bricks")));
+//                blocksToSearch.add(Registry.BLOCK.get(new ResourceLocation("minecraft:deepslate_brick_slab")));
 
                 //check for nearest polished vault stone
-                BlockPos vaultStoneLoc = isBlockNearby(serverWorld, pos, Registry.BLOCK.get(new ResourceLocation(vaultStoneBlock)), 15);
-
+                BlockPos hunterSpawnPos = isBlockNearby(serverWorld, pos, blocksToSearch, 20);
 
                 //spawn a vault fighter at the nearest polished vault stone
-                if (vaultStoneLoc != null) {
+                if (hunterSpawnPos != null) {
                     EntityType<?> entityType = EntityType.byString(vaultFighterEntity).orElse(null);
                     if (entityType != null) {
                         Entity entity = entityType.create(serverWorld);
                         if (entity != null) {
 
-                            serverWorld.playSound(null, vaultStoneLoc, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 2.0F, 1.0F);
-                            serverWorld.playSound(null, vaultStoneLoc, SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 2.0F, 1.9F);
+                            serverWorld.playSound(null, hunterSpawnPos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 1.0F, 1.0F);
+                            serverWorld.playSound(null, hunterSpawnPos, SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0F, 0.2F);
 
-//                            SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation("the_vault:artifact_boss_death"));
-//                            serverWorld.playSound(null, vaultStoneLoc, sound, SoundSource.MASTER, 2.0F, 1.0F);
+                            event.getPlayer().sendMessage(new TextComponent("please send kelp").withStyle(ChatFormatting.OBFUSCATED).withStyle(ChatFormatting.RED), event.getPlayer().getUUID());
+                            event.getPlayer().sendMessage(new TextComponent("You think you can succeed? Where even I have failed?").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), event.getPlayer().getUUID());
+                            event.getPlayer().sendMessage(new TextComponent("please send kelp").withStyle(ChatFormatting.OBFUSCATED).withStyle(ChatFormatting.RED), event.getPlayer().getUUID());
 
 
-                            entity.moveTo(vaultStoneLoc.getX() + 0.5, vaultStoneLoc.getY() + 1, vaultStoneLoc.getZ() + 0.5);
-                            serverWorld.addFreshEntity(entity);
+                            serverWorld.sendParticles(ParticleTypes.PORTAL, hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5, 8000, 1, 2.0, 1, 2);
+
+                            // Schedule the second sendParticles call with a delay
+
+                            MinecraftServer server = serverWorld.getServer();
+
+                            // Schedule the second sendParticles call with a delay
+                            ScheduledExecutorService scheduler = java.util.concurrent.Executors.newScheduledThreadPool(1);
+                            scheduler.schedule(() -> {
+                                server.execute(() -> {
+                                    serverWorld.sendParticles(ParticleTypes.REVERSE_PORTAL, hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5, 6000, 0.5, 2.0, 0.5, 2);
+
+                                    entity.moveTo(hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5);
+                                    serverWorld.addFreshEntity(entity);
+                                });
+                            }, 2300, TimeUnit.MILLISECONDS);
 
 
                         }
                     }
                 }
 
-
             }
         }
 
-        public static BlockPos isBlockNearby(ServerLevel world, BlockPos center, Block blockToFind, int maxRadius) {
+        public static BlockPos isBlockNearby(ServerLevel world, BlockPos center, List<Block> blocksToFind, int maxRadius) {
             for (int radius = 0; radius <= maxRadius; radius++) {
                 for (int x = -radius; x <= radius; x++) {
                     for (int y = -radius; y <= radius; y++) {
                         for (int z = -radius; z <= radius; z++) {
                             if (Math.abs(x) == radius || Math.abs(y) == radius || Math.abs(z) == radius) {
                                 BlockPos pos = center.offset(x, y, z);
-                                if (world.getBlockState(pos).getBlock() == blockToFind) {
-
+                                if (blocksToFind.contains(world.getBlockState(pos).getBlock()) ) {
                                     // Check if blocks above are safe to spawn
-                                    boolean isAir = world.getBlockState(pos.above()).isAir() && world.getBlockState(pos.above(2)).isAir();
-                                    boolean isWater = world.getBlockState(pos.above()).getFluidState().isSource() && world.getBlockState(pos.above(2)).getFluidState().isSource();
-                                    boolean isSnow = world.getBlockState(pos.above()).getBlock() == Blocks.SNOW;
-
-                                    if (isAir || isWater || isSnow) {
-                                        return pos;
-                                    }
+                                    boolean isTransparent = world.getBlockState(pos.above()).getMaterial().isReplaceable() && world.getBlockState(pos.above(2)).getMaterial().isReplaceable();
+                                    if (isTransparent) return pos;
                                 }
                             }
                         }
