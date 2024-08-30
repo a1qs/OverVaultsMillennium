@@ -119,6 +119,7 @@ public class VaultPortalStructures extends StructureFeature<JigsawConfiguration>
     private static Block CUT_VINE = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("quark:cut_vine"));
     private static Block CHROMATIC_IRON_ORE = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("the_vault:chromatic_iron_ore"));
     private static Block RAW_CHROMATIC_IRON_BLOCK = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("the_vault:raw_chromatic_iron_block"));
+    private static Block GILDED_SCONCE = ForgeRegistries.BLOCKS.getValue(new ResourceLocation("the_vault:gilded_sconce"));
 
     private static void afterPlace(WorldGenLevel level, StructureFeatureManager structureFeatureManager, ChunkGenerator chunkGenerator, Random random, BoundingBox boundingBox, ChunkPos chunkPos, PiecesContainer piecesContainer) {
 
@@ -128,7 +129,7 @@ public class VaultPortalStructures extends StructureFeature<JigsawConfiguration>
                     BlockPos pos = new BlockPos(x, y, z);
                     BlockState currentState = level.getBlockState(pos);
 
-                    if (currentState.is(Blocks.VINE) || currentState.is(CUT_VINE) || currentState.is(CHROMATIC_IRON_ORE)) {
+                    if (currentState.is(Blocks.VINE) || currentState.is(CUT_VINE) || currentState.is(CHROMATIC_IRON_ORE) || currentState.is(GILDED_SCONCE)) {
 
                         boolean isSubmerged =
                                 level.getBlockState(pos.above()).getFluidState().isSource() ||
