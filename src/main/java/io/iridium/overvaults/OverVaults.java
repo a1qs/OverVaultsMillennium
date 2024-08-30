@@ -5,6 +5,7 @@ import com.mojang.logging.LogUtils;
 import io.iridium.overvaults.world.structure.ModStructures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -15,6 +16,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerAdvancementManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -24,6 +26,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 
+import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -91,17 +94,11 @@ public class OverVaults {
                 BlockPos hunterSpawnPos = isBlockNearby(serverWorld, pos, blocksToSearch, 20);
 
                 //spawn a vault fighter at the nearest polished vault stone
-                if (hunterSpawnPos == null) {
-                    removeAdvancement((ServerPlayer) event.getPlayer(), "overvaults:exploration/root");
-                    return;
-                }
                 EntityType<?> entityType = EntityType.byString(vaultFighterEntity).orElse(null);
-                if (entityType == null) {
-                    removeAdvancement((ServerPlayer) event.getPlayer(), "overvaults:exploration/root");
-                    return;
-                }
-                Entity entity = entityType.create(serverWorld);
-                if (entity == null) {
+                Entity entity;
+
+                if (hunterSpawnPos == null || entityType == null || (entity = entityType.create(serverWorld)) == null) {
+                    removeAdvancement((ServerPlayer) event.getPlayer(), "overvaults:exploration/whispers");
                     removeAdvancement((ServerPlayer) event.getPlayer(), "overvaults:exploration/root");
                     return;
                 }
@@ -136,13 +133,12 @@ public class OverVaults {
         }
 
         public static void removeAdvancement(ServerPlayer player, String advancementID) {
-            ResourceLocation advancementLoc = new ResourceLocation(advancementID);
-            Advancement adv = player.getServer().getAdvancements().getAdvancement(advancementLoc);
-
-            if (adv != null) {
-                player.getAdvancements().revoke(adv, "trigger");
+            MinecraftServer server = player.getServer();
+            if (server != null) {
+                String command = String.format("advancement revoke %s from %s", player.getName().getString(), advancementID);
+                CommandSourceStack commandSourceStack = server.createCommandSourceStack().withSuppressedOutput();
+                server.getCommands().performCommand(commandSourceStack, command);
             }
-
         }
 
 
