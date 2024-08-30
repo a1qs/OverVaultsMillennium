@@ -155,6 +155,8 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.9'
+//    runtimeOnly fg.deobf("curse.maven:lightspeedmod-821790:4594803")
+//    runtimeOnly fg.deobf("maven.modrinth:ksyxis:QFfBwOwT")
 //    implementation fg.deobf("curse.maven:vault-hunters-official-mod-458203:${vault_hunters_version}")
 
     // Dependencies for Runtime Debug
@@ -225,3 +227,26 @@ publishing {
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
 }
+
+task copyMostRecentFile {
+    doLast {
+        def sourceDir = file('build/libs')
+        def destDir = file(System.getenv('APPDATA') + '\\ATLauncher\\instances\\VaultHunters3rdEdition\\mods')
+
+        // Find the most recent file
+        def mostRecentFile = sourceDir.listFiles().max { it.lastModified() }
+
+        if (mostRecentFile) {
+            copy {
+                from mostRecentFile
+                into destDir
+            }
+            println "Copied ${mostRecentFile.name} to ${destDir}"
+        } else {
+            println "No files found in ${sourceDir}"
+        }
+    }
+}
+
+// Ensure the task runs after the build
+build.finalizedBy(copyMostRecentFile)

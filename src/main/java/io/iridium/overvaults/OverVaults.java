@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 
 import io.iridium.overvaults.world.structure.ModStructures;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -15,6 +16,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.*;
@@ -89,44 +91,60 @@ public class OverVaults {
                 BlockPos hunterSpawnPos = isBlockNearby(serverWorld, pos, blocksToSearch, 20);
 
                 //spawn a vault fighter at the nearest polished vault stone
-                if (hunterSpawnPos != null) {
-                    EntityType<?> entityType = EntityType.byString(vaultFighterEntity).orElse(null);
-                    if (entityType != null) {
-                        Entity entity = entityType.create(serverWorld);
-                        if (entity != null) {
-
-                            serverWorld.playSound(null, hunterSpawnPos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 1.0F, 1.0F);
-                            serverWorld.playSound(null, hunterSpawnPos, SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0F, 0.2F);
-
-                            event.getPlayer().sendMessage(new TextComponent("please send kelp").withStyle(ChatFormatting.OBFUSCATED).withStyle(ChatFormatting.RED), event.getPlayer().getUUID());
-                            event.getPlayer().sendMessage(new TextComponent("You think you can succeed? Where even I have failed?").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), event.getPlayer().getUUID());
-                            event.getPlayer().sendMessage(new TextComponent("please send kelp").withStyle(ChatFormatting.OBFUSCATED).withStyle(ChatFormatting.RED), event.getPlayer().getUUID());
-
-
-                            serverWorld.sendParticles(ParticleTypes.PORTAL, hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5, 8000, 1, 2.0, 1, 2);
-
-                            // Schedule the second sendParticles call with a delay
-
-                            MinecraftServer server = serverWorld.getServer();
-
-                            // Schedule the second sendParticles call with a delay
-                            ScheduledExecutorService scheduler = java.util.concurrent.Executors.newScheduledThreadPool(1);
-                            scheduler.schedule(() -> {
-                                server.execute(() -> {
-                                    serverWorld.sendParticles(ParticleTypes.REVERSE_PORTAL, hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5, 6000, 0.5, 2.0, 0.5, 2);
-
-                                    entity.moveTo(hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5);
-                                    serverWorld.addFreshEntity(entity);
-                                });
-                            }, 2300, TimeUnit.MILLISECONDS);
-
-
-                        }
-                    }
+                if (hunterSpawnPos == null) {
+                    removeAdvancement((ServerPlayer) event.getPlayer(), "overvaults:exploration/root");
+                    return;
                 }
+                EntityType<?> entityType = EntityType.byString(vaultFighterEntity).orElse(null);
+                if (entityType == null) {
+                    removeAdvancement((ServerPlayer) event.getPlayer(), "overvaults:exploration/root");
+                    return;
+                }
+                Entity entity = entityType.create(serverWorld);
+                if (entity == null) {
+                    removeAdvancement((ServerPlayer) event.getPlayer(), "overvaults:exploration/root");
+                    return;
+                }
+
+                serverWorld.playSound(null, hunterSpawnPos, SoundEvents.LIGHTNING_BOLT_THUNDER, SoundSource.MASTER, 1.0F, 1.0F);
+                serverWorld.playSound(null, hunterSpawnPos, SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0F, 0.2F);
+
+                event.getPlayer().sendMessage(new TextComponent("please send kelp").withStyle(ChatFormatting.OBFUSCATED).withStyle(ChatFormatting.RED), event.getPlayer().getUUID());
+                event.getPlayer().sendMessage(new TextComponent("You think you can succeed? Where even I have failed?").withStyle(ChatFormatting.ITALIC).withStyle(ChatFormatting.GRAY), event.getPlayer().getUUID());
+                event.getPlayer().sendMessage(new TextComponent("please send kelp").withStyle(ChatFormatting.OBFUSCATED).withStyle(ChatFormatting.RED), event.getPlayer().getUUID());
+
+
+                serverWorld.sendParticles(ParticleTypes.PORTAL, hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5, 8000, 1, 2.0, 1, 2);
+
+                // Schedule the second sendParticles call with a delay
+
+                MinecraftServer server = serverWorld.getServer();
+
+                // Schedule the second sendParticles call with a delay
+                ScheduledExecutorService scheduler = java.util.concurrent.Executors.newScheduledThreadPool(1);
+                scheduler.schedule(() -> {
+                    server.execute(() -> {
+                        serverWorld.sendParticles(ParticleTypes.REVERSE_PORTAL, hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5, 6000, 0.5, 2.0, 0.5, 2);
+
+                        entity.moveTo(hunterSpawnPos.getX() + 0.5, hunterSpawnPos.getY() + 1, hunterSpawnPos.getZ() + 0.5);
+                        serverWorld.addFreshEntity(entity);
+                    });
+                }, 2300, TimeUnit.MILLISECONDS);
+
 
             }
         }
+
+        public static void removeAdvancement(ServerPlayer player, String advancementID) {
+            ResourceLocation advancementLoc = new ResourceLocation(advancementID);
+            Advancement adv = player.getServer().getAdvancements().getAdvancement(advancementLoc);
+
+            if (adv != null) {
+                player.getAdvancements().revoke(adv, "trigger");
+            }
+
+        }
+
 
         public static BlockPos isBlockNearby(ServerLevel world, BlockPos center, List<Block> blocksToFind, int maxRadius) {
             for (int radius = 0; radius <= maxRadius; radius++) {
