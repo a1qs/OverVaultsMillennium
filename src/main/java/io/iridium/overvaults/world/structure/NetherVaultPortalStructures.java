@@ -156,26 +156,20 @@ public class NetherVaultPortalStructures extends StructureFeature<JigsawConfigur
     }
 
     private static int findValidY(PieceGeneratorSupplier.Context<JigsawConfiguration> context, BlockPos blockpos, int structureHeight, Random random) {
-        int startY = 80;  // Starting Y-level for the search (you can adjust this)
+        int startY = 80;
         int endY = 32;
-        List<Integer> validYLevels = new ArrayList<>();  // List to store all valid Y-levels
+        List<Integer> validYLevels = new ArrayList<>();
 
-        ChunkGenerator chunkGenerator = context.chunkGenerator();
-        LevelHeightAccessor heightAccessor = context.heightAccessor();
 
-        // Loop from the starting Y to the ending Y to find valid Y-levels
         for (int y = startY; y >= endY; y--) {
             BlockPos currentPos = new BlockPos(blockpos.getX(), y, blockpos.getZ());
 
 
-
-            // Check if there's enough vertical space above the current Y-level for the structure
             boolean hasEnoughSpace = true;
             for (int offset = 0; offset < structureHeight; offset++) {
                 BlockPos posToCheck = currentPos.above(offset);
                 BlockState blockState = context.chunkGenerator().getBaseColumn(posToCheck.getX(), posToCheck.getZ(), context.heightAccessor()).getBlock(posToCheck.getY());
 
-                // If the block is air or fluid, it's fine; otherwise, mark it as unsuitable
                 if (!blockState.isAir() && !blockState.getFluidState().isEmpty()) {
                     hasEnoughSpace = false;
                     break;
