@@ -2,6 +2,9 @@ package io.iridium.overvaults;
 
 import com.mojang.logging.LogUtils;
 
+import io.iridium.overvaults.millenium.ServerConfig;
+import io.iridium.overvaults.millenium.StructureTrackingEventHandler;
+import io.iridium.overvaults.millenium.event.ServerTickEvent;
 import io.iridium.overvaults.world.structure.ModStructures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -24,7 +27,9 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -49,6 +54,9 @@ public class OverVaults {
         modEventBus.addListener(this::clientSetup);
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(StructureTrackingEventHandler.class);
+        MinecraftForge.EVENT_BUS.addListener(ServerTickEvent::onServerTick);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, "overvaults-server.toml");
 
         ModStructures.register(modEventBus);
 
@@ -186,8 +194,6 @@ public class OverVaults {
                 }
             }
         }
-
-
     }
 }
 
