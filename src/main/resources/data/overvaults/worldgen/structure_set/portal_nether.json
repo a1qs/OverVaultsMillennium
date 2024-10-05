@@ -1,0 +1,21 @@
+{
+
+  "structures": [
+    {
+      "structure": "overvaults:portal_nether",
+      "weight": 1
+    }
+  ],
+  "placement": {
+
+    "salt": 1234570,
+
+    // The average distance apart in chunks for spawn attempts
+    "spacing": 24,
+
+    // Minimum distance apart in chunks for spawn attempts
+    "separation": 8,
+
+    "type": "minecraft:random_spread"
+  }
+}

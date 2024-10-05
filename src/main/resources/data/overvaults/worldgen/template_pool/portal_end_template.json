@@ -1,0 +1,19 @@
+{
+
+  // This is the name of the template pool itself.
+  "name": "overvaults:portal_end_template",
+
+  "fallback": "minecraft:empty",
+
+  "elements": [
+    {
+      "weight": 2,
+      "element": {
+        "location": "overvaults:portal2_end_ruin0",
+        "processors": "overvaults:portal_wear",
+        "projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}
