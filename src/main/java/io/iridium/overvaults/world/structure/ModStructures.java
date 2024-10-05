@@ -11,7 +11,7 @@ public class ModStructures {
 
     public static final DeferredRegister<StructureFeature<?>> DEFERRED_REGISTRY_STRUCTURE = DeferredRegister.create(ForgeRegistries.STRUCTURE_FEATURES, OverVaults.MOD_ID);
     public static final RegistryObject<StructureFeature<?>> VAULT_PORTAL_STRUCTURES = DEFERRED_REGISTRY_STRUCTURE.register("vault_portal_structures", VaultPortalStructures::new);
-
+    public static final RegistryObject<StructureFeature<?>> NETHER_VAULT_PORTAL_STRUCTURES = DEFERRED_REGISTRY_STRUCTURE.register("nether_vault_portal_structures", NetherVaultPortalStructures::new);
 
     public static void register(IEventBus eventBus){
         DEFERRED_REGISTRY_STRUCTURE.register(eventBus);
