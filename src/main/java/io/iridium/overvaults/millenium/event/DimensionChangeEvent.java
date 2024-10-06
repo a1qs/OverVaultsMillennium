@@ -1,6 +1,7 @@
 package io.iridium.overvaults.millenium.event;
 
 
+import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.world.PortalData;
 import net.minecraft.server.level.ServerLevel;
@@ -15,6 +16,7 @@ public class DimensionChangeEvent {
     public static void onDimensionChange(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getPlayer() == null) return;
         if (ServerLifecycleHooks.getCurrentServer() == null) return;
+        if (!ServerConfig.UPDATE_VAULT_COMPASS.get()) return;
 
         if (event.getPlayer().getLevel() instanceof ServerLevel level) {
             PortalData data = PortalUtil.getAllLevelActivePortalData(ServerLifecycleHooks.getCurrentServer());
