@@ -14,7 +14,7 @@
     "spacing": 24,
 
     // Minimum distance apart in chunks for spawn attempts
-    "separation": 8,
+    "separation": 12,
 
     "type": "minecraft:random_spread"
   }

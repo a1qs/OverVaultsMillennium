@@ -24,6 +24,10 @@
     {
       "structure": "overvaults:portal_ice",
       "weight": 1
+    },
+    {
+      "structure": "overvaults:portal_end",
+      "weight": 1
     }
   ],
   "placement": {
