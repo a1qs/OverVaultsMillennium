@@ -2,7 +2,7 @@ package io.iridium.overvaults;
 
 import com.mojang.logging.LogUtils;
 
-import io.iridium.overvaults.millenium.ServerConfig;
+import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.event.StructureTrackingEventHandler;
 import io.iridium.overvaults.millenium.event.DimensionChangeEvent;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;

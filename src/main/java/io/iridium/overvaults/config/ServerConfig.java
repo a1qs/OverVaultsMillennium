@@ -1,4 +1,4 @@
-package io.iridium.overvaults.millenium;
+package io.iridium.overvaults.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

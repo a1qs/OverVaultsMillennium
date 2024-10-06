@@ -1,7 +1,7 @@
 package io.iridium.overvaults.millenium.event;
 
 import io.iridium.overvaults.OverVaults;
-import io.iridium.overvaults.millenium.ServerConfig;
+import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.util.PortalNbtUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
@@ -127,12 +127,12 @@ public class ServerTickEvent {
                 }
 
                 if (!foundPortal) {
-                    OverVaults.LOGGER.error("Could not find a valid OverVaults structure to open a Vault Portal in any dimension.");
+                    OverVaults.LOGGER.warn("Could not find a valid OverVaults structure to open a Vault Portal in any dimension.");
                     counter = 0;
                 }
 
             } else {
-                OverVaults.LOGGER.error("No valid dimensions found for spawning a portal.");
+                OverVaults.LOGGER.warn("No valid dimensions found for spawning a portal.");
                 counter = 0;
             }
         }

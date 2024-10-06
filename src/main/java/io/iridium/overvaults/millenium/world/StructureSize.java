@@ -1,4 +1,4 @@
-package io.iridium.overvaults.millenium;
+package io.iridium.overvaults.millenium.world;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Rotation;

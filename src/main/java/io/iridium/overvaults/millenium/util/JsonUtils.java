@@ -34,7 +34,7 @@ public class JsonUtils {
         }
     }
 
-    public static JsonObject getVaultLootTable(ResourceLocation lootTablelocation) {
+    public static JsonObject getVaultLootTableJsonObject(ResourceLocation lootTablelocation) {
         Path gameDir = FMLPaths.GAMEDIR.get();
         Path fullPath = gameDir.resolve(VaultRegistry.LOOT_TABLE.getKey(lootTablelocation).get(Version.latest()).getPath());
 

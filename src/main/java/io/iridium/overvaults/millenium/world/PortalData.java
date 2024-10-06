@@ -1,6 +1,5 @@
 package io.iridium.overvaults.millenium.world;
 
-import io.iridium.overvaults.millenium.StructureSize;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;

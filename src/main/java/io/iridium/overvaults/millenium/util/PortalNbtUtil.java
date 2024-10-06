@@ -1,6 +1,6 @@
 package io.iridium.overvaults.millenium.util;
 
-import io.iridium.overvaults.millenium.ServerConfig;
+import io.iridium.overvaults.config.ServerConfig;
 import iskallia.vault.VaultMod;
 import iskallia.vault.core.random.JavaRandom;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;

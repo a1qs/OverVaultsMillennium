@@ -3,8 +3,8 @@ package io.iridium.overvaults.millenium.event;
 
 import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.OverVaults;
-import io.iridium.overvaults.millenium.ServerConfig;
-import io.iridium.overvaults.millenium.StructureSize;
+import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.millenium.world.StructureSize;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
 import io.iridium.overvaults.world.structure.ModStructures;

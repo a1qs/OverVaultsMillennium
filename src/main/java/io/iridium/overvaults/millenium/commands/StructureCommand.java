@@ -386,7 +386,7 @@ public class StructureCommand {
         }
 
         private List<String> getWeightsForResourceLocation(ResourceLocation resourceLocation) {
-            JsonObject obj = JsonUtils.getVaultLootTable(resourceLocation);
+            JsonObject obj = JsonUtils.getVaultLootTableJsonObject(resourceLocation);
             JsonArray entries = obj.getAsJsonArray("entries");
             List<String> weightList = new ArrayList<>();
             for (JsonElement entryElement : entries) {

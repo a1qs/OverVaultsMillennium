@@ -29,7 +29,7 @@ public class BlockEntityChunkSavedData extends SavedData {
             data.addPortalTileEntity(pos);
         }
 
-        // Load force-loaded chunks
+        // Load force-loaded chunk positions
         ListTag chunkList = nbt.getList("LoadedChunks", Tag.TAG_COMPOUND);
         for (int i = 0; i < chunkList.size(); i++) {
             CompoundTag dataTag = chunkList.getCompound(i);
@@ -53,6 +53,7 @@ public class BlockEntityChunkSavedData extends SavedData {
         }
         nbt.put("PortalTilePositions", portalPosList);
 
+        // Save force-loaded chunk positions
         ListTag chunkList = new ListTag();
         for (ChunkPos chunkPos : loadedChunks) {
             CompoundTag chunkTag = new CompoundTag();
