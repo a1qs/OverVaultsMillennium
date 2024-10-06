@@ -13,6 +13,7 @@ public class ServerConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> SET_LEVEL_OF_ENTERING_PLAYER;
     public static final ForgeConfigSpec.ConfigValue<Boolean> BROADCAST_IN_CHAT;
     public static final ForgeConfigSpec.ConfigValue<Boolean> PLAY_SOUND_ON_OPEN;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> UPDATE_VAULT_COMPASS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> INFORM_PLAYERS_IN_VAULTS;
 
 
@@ -48,6 +49,9 @@ public class ServerConfig {
 
         PLAY_SOUND_ON_OPEN = BUILDER.comment("Whether it should play a sound for every player whenever an OverVault opens")
                 .define("PLAY_SOUND_ON_OPEN", true);
+
+        UPDATE_VAULT_COMPASS = BUILDER.comment("Whether the Vault Compass should be updated upon switching Dimensions/an OverVault opening")
+                .define("UPDATE_VAULT_COMPASS", true);
 
         INFORM_PLAYERS_IN_VAULTS = BUILDER.comment("Whether Players inside of Vaults should also be informed about an OverVault opening.")
                 .define("INFORM_PLAYERS_IN_VAULTS", true);
