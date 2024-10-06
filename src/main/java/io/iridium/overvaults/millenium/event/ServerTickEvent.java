@@ -118,7 +118,7 @@ public class ServerTickEvent {
                         entityChunkData.setDirty();
 
                         data.setActiveState(true);
-                        sendCompassInfo(level, data.getPortalFrameCenterPos());
+                        if(ServerConfig.UPDATE_VAULT_COMPASS.get()) sendCompassInfo(level, data.getPortalFrameCenterPos());
                         portalSavedData.setDirty();
 
                         counter = 0;
@@ -210,7 +210,7 @@ public class ServerTickEvent {
      * @param level Used to send the VaultMessage.Sync to each player in the Level
      * @param pos Position where the Vault Compass will point to
      */
-    private static void sendCompassInfo(ServerLevel level, BlockPos pos) {
+    public static void sendCompassInfo(ServerLevel level, BlockPos pos) {
         level.getPlayers(serverPlayer -> true).forEach(serverPlayer -> {
             Vault vault = new Vault();
             WorldManager worldManager = new WorldManager();
