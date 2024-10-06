@@ -34,7 +34,7 @@ public class ServerConfig {
 
 
     static {
-        BUILDER.comment("ServerConfigs for OverVaults - Millenium Edition");
+        BUILDER.comment("ServerConfigs for OverVaults - Millennium Edition");
 
         //General Settings
         BUILDER.push("General Settings");
@@ -63,10 +63,10 @@ public class ServerConfig {
         BUILDER.push("Timing Settings");
 
         SECONDS_UNTIL_PORTAL_SPAWN = BUILDER.comment("Time in seconds until a OverVault is attempted to be opened.")
-                .define("SECONDS_UNTIL_PORTAL_SPAWN", 30);
+                .define("SECONDS_UNTIL_PORTAL_SPAWN", 9000);
 
         SECONDS_UNTIL_MODIFIER_REMOVAL = BUILDER.comment("Time in seconds until a Modifier is removed from an OverVault")
-                .define("SECONDS_UNTIL_MODIFIER_REMOVAL", 30);
+                .define("SECONDS_UNTIL_MODIFIER_REMOVAL", 1800);
 
         BUILDER.pop();
 
@@ -83,9 +83,9 @@ public class ServerConfig {
                 .define("UBER_VAULT_WEIGHT", 5);
 
         CHANCE_OF_SPECIAL_THEME_NETHER = BUILDER.comment("The chance of getting a special theme defined in 'NETHER_VAULT_THEMES' as a decimal.")
-                .defineInRange("CHANCE_OF_SPECIAL_THEME_NETHER", 0.2, 0.0, 1.0);
+                .defineInRange("CHANCE_OF_SPECIAL_THEME_NETHER", 0.15, 0.0, 1.0);
         CHANCE_OF_SPECIAL_THEME_END = BUILDER.comment("The chance of getting a special theme defined in 'VOID_VAULT_THEMES' as a decimal.")
-                .defineInRange("CHANCE_OF_SPECIAL_THEME_END", 0.15, 0.0, 1.0);
+                .defineInRange("CHANCE_OF_SPECIAL_THEME_END", 0.10, 0.0, 1.0);
 
         BUILDER.pop();
 

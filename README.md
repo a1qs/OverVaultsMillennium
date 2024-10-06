@@ -17,8 +17,8 @@ Additional structures are planned (more rare portal types, and maybe rare shrine
 It can be added to existing worlds, however only new chunks will be able to spawn the portals. 
 
 -----------
-## OverVaults Millenium Edition
-###### *made for the Millenium VHSMP Server*
+## OverVaults Millennium Edition
+###### *made for the Millennium VHSMP Server*
 
 ### New Features
 In this version of OverVaults, forked from [OverVaults](https://github.com/IridiumIO/OverVaults) there are a few additional features, such as:
@@ -41,6 +41,7 @@ In this version of OverVaults, forked from [OverVaults](https://github.com/Iridi
 * Only Portals that have a complete frame will be deemed valid and have a chance to be an active OverVault
 * Upon entering, the players Vault Level will be used for the vault who entered
 * Portal Tile Entities & Chunks force-loaded while there is an active OverVault will be saved and perserved on server crashes/restarts
+* If a Portal has been broken by a player/any other way, on the next check for modifier removal, the portal will be verified, and if its not present, its associated data will be removed and the counter for an active OverVault will restart
 * Added new Commands:
     * `/overvaults getActiveOverVault` -> returns the current active Vault with position, rotation, tp command and more
     * `/overvaults getNextOverVaultSpawn` -> returns the time until a new attempt is made to spawn an active OverVault
