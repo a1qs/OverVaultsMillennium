@@ -34,7 +34,7 @@ public class StructureTrackingEventHandler {
 
     private static final List<ResourceLocation> validStructures = new ArrayList<>(
             Arrays.asList(
-                    //overvaults:portal1_leafy_ruin0
+                    new ResourceLocation(OverVaults.MOD_ID, "portal1_leafy_ruin0"),
                     new ResourceLocation(OverVaults.MOD_ID, "portal1_desert_ruin0"),
                     new ResourceLocation(OverVaults.MOD_ID, "portal1_mesa_ruin0"),
                     new ResourceLocation(OverVaults.MOD_ID, "portal1_ruin0"),
@@ -99,6 +99,12 @@ public class StructureTrackingEventHandler {
                     Rotation.NONE, new BlockPos(0, -1, -1),
                     Rotation.CLOCKWISE_90, new BlockPos(0, -1, 0),
                     Rotation.CLOCKWISE_180, new BlockPos(0, -1, 0),
+                    Rotation.COUNTERCLOCKWISE_90, new BlockPos(-1, -1, 0)
+            )),
+            new ResourceLocation("overvaults:portal1_leafy_ruin0"), new Pair<>(StructureSize.LARGE, Map.of(
+                    Rotation.NONE, new BlockPos(0, -1, -1),
+                    Rotation.CLOCKWISE_90, new BlockPos(0, -1, -1),
+                    Rotation.CLOCKWISE_180, new BlockPos(-1, -1, 0),
                     Rotation.COUNTERCLOCKWISE_90, new BlockPos(-1, -1, 0)
             ))
     );
