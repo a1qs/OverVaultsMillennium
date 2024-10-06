@@ -107,7 +107,7 @@ public class StructureTrackingEventHandler {
     public static void onWorldLoad(ChunkEvent.Load event) {
         if (event.getChunk() instanceof LevelChunk chunk) {
             if(chunk.getLevel().isClientSide()) return;
-            if(chunk.getLevel() instanceof VirtualWorld) return; //todo: test
+            if(chunk.getLevel() instanceof VirtualWorld) return;
 
             if(chunk.getLevel() instanceof ServerLevel level) {
                 Map<ConfiguredStructureFeature<?, ?>, StructureStart> structureStarts = chunk.getAllStarts();
