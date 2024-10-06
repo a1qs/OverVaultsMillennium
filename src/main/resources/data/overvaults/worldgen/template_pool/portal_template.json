@@ -44,7 +44,7 @@
     },
 
     {
-      "weight": 2,
+      "weight": 4,
       "element": {
         "location": "overvaults:portal2_ruin0",
         "processors": "overvaults:portal_wear",
