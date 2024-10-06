@@ -1,11 +1,10 @@
 package io.iridium.overvaults;
 
 import com.mojang.logging.LogUtils;
-
 import io.iridium.overvaults.config.ServerConfig;
-import io.iridium.overvaults.millenium.event.StructureTrackingEventHandler;
 import io.iridium.overvaults.millenium.event.DimensionChangeEvent;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;
+import io.iridium.overvaults.millenium.event.StructureTrackingEventHandler;
 import io.iridium.overvaults.world.structure.ModStructures;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
@@ -19,8 +18,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.*;
-
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.common.MinecraftForge;
