@@ -3,7 +3,8 @@ package io.iridium.overvaults;
 import com.mojang.logging.LogUtils;
 
 import io.iridium.overvaults.millenium.ServerConfig;
-import io.iridium.overvaults.millenium.StructureTrackingEventHandler;
+import io.iridium.overvaults.millenium.event.StructureTrackingEventHandler;
+import io.iridium.overvaults.millenium.event.DimensionChangeEvent;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;
 import io.iridium.overvaults.world.structure.ModStructures;
 import net.minecraft.ChatFormatting;
@@ -56,6 +57,7 @@ public class OverVaults {
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.register(StructureTrackingEventHandler.class);
         MinecraftForge.EVENT_BUS.addListener(ServerTickEvent::onServerTick);
+        MinecraftForge.EVENT_BUS.addListener(DimensionChangeEvent::onDimensionChange);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, "overvaults-server.toml");
 
         ModStructures.register(modEventBus);
