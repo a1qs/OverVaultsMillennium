@@ -7,7 +7,7 @@
 
   "elements": [
     {
-      "weight": 1,
+      "weight": 0,
       "element": {
         "location": "overvaults:portal2_end_ruin0",
         "processors": "overvaults:portal_wear",
