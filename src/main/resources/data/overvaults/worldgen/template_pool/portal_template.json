@@ -16,34 +16,6 @@
       }
     },
     {
-      "weight": 0,
-      "element": {
-        "location": "overvaults:portal1_ruin1",
-        "processors": "overvaults:portal_wear",
-        "projection": "rigid",
-        "element_type": "minecraft:single_pool_element"
-      } 
-    },
-    {
-      "weight": 0,
-      "element": {
-        "location": "overvaults:portal1_ruin2",
-        "processors": "overvaults:portal_wear",
-        "projection": "rigid",
-        "element_type": "minecraft:single_pool_element"
-      } 
-    },
-    {
-      "weight": 0,
-      "element": {
-        "location": "overvaults:portal1_ruin3",
-        "processors": "overvaults:portal_wear",
-        "projection": "rigid",
-        "element_type": "minecraft:single_pool_element"
-      } 
-    },
-
-    {
       "weight": 4,
       "element": {
         "location": "overvaults:portal2_ruin0",
@@ -51,34 +23,6 @@
         "projection": "rigid",
         "element_type": "minecraft:single_pool_element"
       }
-    },
-    {
-      "weight": 0,
-      "element": {
-        "location": "overvaults:portal2_ruin1",
-        "processors": "overvaults:portal_wear",
-        "projection": "rigid",
-        "element_type": "minecraft:single_pool_element"
-      } 
-    },
-    {
-      "weight": 0,
-      "element": {
-        "location": "overvaults:portal2_ruin2",
-        "processors": "overvaults:portal_wear",
-        "projection": "rigid",
-        "element_type": "minecraft:single_pool_element"
-      } 
-    },
-    {
-      "weight": 0,
-      "element": {
-        "location": "overvaults:portal2_ruin3",
-        "processors": "overvaults:portal_wear",
-        "projection": "rigid",
-        "element_type": "minecraft:single_pool_element"
-      } 
     }
-
   ]
 }
