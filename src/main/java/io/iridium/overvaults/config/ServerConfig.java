@@ -17,8 +17,10 @@ public class ServerConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> INFORM_PLAYERS_IN_VAULTS;
 
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> SECONDS_UNTIL_PORTAL_SPAWN;
-    public static final ForgeConfigSpec.ConfigValue<Integer> SECONDS_UNTIL_MODIFIER_REMOVAL;
+    public static final ForgeConfigSpec.ConfigValue<Integer> MIN_SECONDS_UNTIL_PORTAL_SPAWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> MIN_SECONDS_UNTIL_MODIFIER_REMOVAL;
+    public static final ForgeConfigSpec.ConfigValue<Integer> MAX_SECONDS_UNTIL_PORTAL_SPAWN;
+    public static final ForgeConfigSpec.ConfigValue<Integer> MAX_SECONDS_UNTIL_MODIFIER_REMOVAL;
 
     public static final ForgeConfigSpec.ConfigValue<Integer> RAW_VAULT_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> NORMAL_VAULT_WEIGHT;
@@ -62,11 +64,17 @@ public class ServerConfig {
         // Timing Settings
         BUILDER.push("Timing Settings");
 
-        SECONDS_UNTIL_PORTAL_SPAWN = BUILDER.comment("Time in seconds until a OverVault is attempted to be opened.")
-                .define("SECONDS_UNTIL_PORTAL_SPAWN", 9000);
+        MIN_SECONDS_UNTIL_PORTAL_SPAWN = BUILDER.comment("Minimum Time in seconds until a OverVault is attempted to be opened.")
+                .define("MIN_SECONDS_UNTIL_PORTAL_SPAWN", 3000);
 
-        SECONDS_UNTIL_MODIFIER_REMOVAL = BUILDER.comment("Time in seconds until a Modifier is removed from an OverVault")
-                .define("SECONDS_UNTIL_MODIFIER_REMOVAL", 1800);
+        MAX_SECONDS_UNTIL_PORTAL_SPAWN = BUILDER.comment("Maximum Time in seconds until a OverVault is attempted to be opened.")
+                .define("MAX_SECONDS_UNTIL_PORTAL_SPAWN", 9000);
+
+        MIN_SECONDS_UNTIL_MODIFIER_REMOVAL = BUILDER.comment("Minimum Time in seconds until a Modifier is removed from an OverVault")
+                .define("MIN_SECONDS_UNTIL_MODIFIER_REMOVAL", 1200);
+
+        MAX_SECONDS_UNTIL_MODIFIER_REMOVAL = BUILDER.comment("Maximum Time in seconds until a Modifier is removed from an OverVault")
+                .define("MAX_SECONDS_UNTIL_MODIFIER_REMOVAL", 1800);
 
         BUILDER.pop();
 
