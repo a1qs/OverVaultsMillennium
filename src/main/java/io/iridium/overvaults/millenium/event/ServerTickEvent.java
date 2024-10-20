@@ -45,10 +45,12 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerTickEvent {
-    public static int counter = 0;
-    public static int ticksForPortalSpawn = ServerConfig.SECONDS_UNTIL_PORTAL_SPAWN.get() * 20;
-    private static int activePortalTickCounter = 0;
-    private static int removeModifierTimer = ServerConfig.SECONDS_UNTIL_MODIFIER_REMOVAL.get() * 20;
+    private static final Random random = new Random();
+    public static int counter = 0; // Counter used to track the time to the next Portal Spawn
+
+    public static int actlTicksForPortalSpawn = -1; // Field to track which time is required for the next Vault Portal Spawn
+    private static int actlRemoveModifierTimer = -1; // Field to track which time is required for the next Modifer Portal Removal
+    private static int activePortalTickCounter = 0; // Field to track the time an OverVault is active
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onServerTick(TickEvent.ServerTickEvent event) {
@@ -67,9 +69,10 @@ public class ServerTickEvent {
                 .filter(Objects::nonNull)
                 .toList();
 
+        if(actlTicksForPortalSpawn == -1) actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
 
         // Check if the counter has reached the limit for portal spawning
-        if (shouldSpawnPortal()) {
+        if (shouldSpawnPortal(actlTicksForPortalSpawn)) {
             if (!validDimensions.isEmpty()) {
                 boolean foundPortal = false;
 
@@ -109,7 +112,7 @@ public class ServerTickEvent {
                         });
 
 
-                        List<VaultPortalTileEntity> portalTileEntities = activatePortal(level, data);
+                        List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(level, data);
 
                         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
                         for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
@@ -121,6 +124,7 @@ public class ServerTickEvent {
                         if(ServerConfig.UPDATE_VAULT_COMPASS.get()) sendCompassInfo(level, data.getPortalFrameCenterPos());
                         portalSavedData.setDirty();
 
+                        actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
                         counter = 0;
                         break;
                     }
@@ -147,7 +151,8 @@ public class ServerTickEvent {
             if (portalSavedData.hasActiveOverVault()) {
                 activePortalTickCounter++;
 
-                if (shouldModifyPortal()) {
+                if(actlRemoveModifierTimer == -1) actlRemoveModifierTimer = getRandomRemoveModifierTimer();
+                if (shouldModifyPortal(actlRemoveModifierTimer)) {
                     BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
                     List<BlockPos> portalTilePositions = entityChunkData.getPortalTilePositions();
 
@@ -196,8 +201,8 @@ public class ServerTickEvent {
                             }
                         }
                     }
-
                     activePortalTickCounter = 0; // Reset the counter after execution
+                    actlRemoveModifierTimer = getRandomRemoveModifierTimer(); //reset the random counter thingy yadda yadda
                 }
             }
         });
@@ -252,48 +257,10 @@ public class ServerTickEvent {
     }
 
     /**
-     * Activates an OverVault Portal
-     *
-     * @param level Level used to force-load chunks, fill blocks, get block entities & determine the Crystal Data of the Portal
-     * @param data The Portal data which we would like to activate, used to determine size, position & rotation of the Portal
-     * @return A List of Vault Portal tile entities that have been filled
-     */
-    private static List<VaultPortalTileEntity> activatePortal(ServerLevel level, PortalData data) {
-        List<VaultPortalTileEntity> vaultPortalTileEntities = new ArrayList<>();
-        BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
-        Iterable<BlockPos> blocksToFill = data.getSize().getBlockPositions(data.getPortalFrameCenterPos(), data.getRotation());
-
-        for(BlockPos pos : blocksToFill) {
-            ChunkPos chunkPos = new ChunkPos(pos);
-
-            if(!entityChunkData.getForceloadedChunks().contains(chunkPos)) {
-                level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, true);
-                entityChunkData.addForceloadedChunk(chunkPos.x, chunkPos.z);
-
-                level.getChunkSource().addRegionTicket(TicketType.FORCED, chunkPos, 1, chunkPos);
-            }
-        }
-
-
-        CrystalData originalCrystalData = PortalNbtUtil.getRandomCrystalData(level.dimension());
-        blocksToFill.forEach(pos -> {
-            level.setBlock(pos, ModBlocks.VAULT_PORTAL.defaultBlockState().rotate(data.getRotation()), 3);
-            BlockEntity te = level.getBlockEntity(pos);
-            if (te instanceof VaultPortalTileEntity portalTE) {
-                CrystalData crystalDataCopy = originalCrystalData.copy();
-                portalTE.setCrystalData(crystalDataCopy);
-                vaultPortalTileEntities.add(portalTE);
-            }
-        });
-
-        return vaultPortalTileEntities;
-    }
-
-    /**
      * Helper method to determine if a portal should spawn
      * @return true/false whether the portal should spawn
      */
-    private static boolean shouldSpawnPortal() {
+    private static boolean shouldSpawnPortal(int ticksForPortalSpawn) {
         return counter >= ticksForPortalSpawn;
     }
 
@@ -301,7 +268,25 @@ public class ServerTickEvent {
      * Helper method to determine if a portal should be modified
      * @return true/false whether the portal should be modified
      */
-    private static boolean shouldModifyPortal() {
+    private static boolean shouldModifyPortal(int removeModifierTimer) {
         return activePortalTickCounter >= removeModifierTimer;
+    }
+
+    /**
+     * Returns a random value for the ticks until portal spawn.
+     */
+    private static int getRandomTicksForPortalSpawn() {
+        int minTicksForPortalSpawn = ServerConfig.MIN_SECONDS_UNTIL_PORTAL_SPAWN.get() * 20;
+        int maxTicksForPortalSpawn = ServerConfig.MAX_SECONDS_UNTIL_PORTAL_SPAWN.get() * 20;
+        return random.nextInt(maxTicksForPortalSpawn - minTicksForPortalSpawn + 1) + minTicksForPortalSpawn;
+    }
+
+    /**
+     * Returns a random value for the ticks until modifier removal.
+     */
+    private static int getRandomRemoveModifierTimer() {
+        int minRemoveModifierTimer = ServerConfig.MIN_SECONDS_UNTIL_MODIFIER_REMOVAL.get() * 20;
+        int maxRemoveModifierTimer = ServerConfig.MAX_SECONDS_UNTIL_MODIFIER_REMOVAL.get() * 20;
+        return random.nextInt(maxRemoveModifierTimer - minRemoveModifierTimer + 1) + minRemoveModifierTimer;
     }
 }
