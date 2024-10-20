@@ -7,6 +7,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -14,20 +15,20 @@ import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;
 import io.iridium.overvaults.millenium.util.JsonUtils;
 import io.iridium.overvaults.millenium.util.PortalUtil;
+import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
+import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.Version;
 import iskallia.vault.core.data.key.LootTableKey;
 import iskallia.vault.core.vault.VaultRegistry;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.ClickEvent;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -55,9 +56,11 @@ public class StructureCommand {
                 .then(Commands.literal("getNextOverVaultSpawn")
                         .executes(this::getNextOverVaultSpawn)
                 )
-
                 .then(Commands.literal("getActiveOverVault")
                         .executes(this::getActiveOverVault)
+                )
+                .then(Commands.literal("activateAllPortals")
+                        .executes(this::activateAllPortals)
                 )
                 .then(Commands.literal("removeItemFromLootTable")
                         .then(Commands.argument("lootTable", ResourceLocationArgument.id())
@@ -85,6 +88,52 @@ public class StructureCommand {
                         )
                 )
         );
+    }
+
+    private int activateAllPortals(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        MinecraftServer server = context.getSource().getServer();
+
+        List<ServerLevel> dimensions = Arrays.asList(
+                server.getLevel(Level.OVERWORLD),
+                server.getLevel(Level.NETHER),
+                server.getLevel(Level.END)
+        );
+
+        List<ServerLevel> validDimensions = dimensions.stream()
+                .filter(Objects::nonNull)
+                .toList();
+
+
+        for(ServerLevel level : validDimensions) {
+            PortalSavedData portalSavedData = PortalSavedData.get(level);
+            for(PortalData data : portalSavedData.getPortalData()) {
+
+                List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(level, data);
+                MutableComponent cmp = new TextComponent("A mysterious energy has appeared in " + level.dimension().location().getPath() + " at ")
+                        .withStyle(ChatFormatting.DARK_PURPLE)
+                        .append("" + data.getPortalFrameCenterPos().getX())
+                        .append(", ")
+                        .append("" + data.getPortalFrameCenterPos().getY())
+                        .append(", ")
+                        .append("" + data.getPortalFrameCenterPos().getZ())
+                        .withStyle(ChatFormatting.RESET)
+                        .withStyle(ChatFormatting.LIGHT_PURPLE);
+
+                BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
+                for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
+                    entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
+                }
+                entityChunkData.setDirty();
+
+                data.setActiveState(true);
+                portalSavedData.setDirty();
+                context.getSource().getPlayerOrException().sendMessage(cmp, ChatType.SYSTEM, Util.NIL_UUID);
+            }
+        }
+
+
+
+        return 0;
     }
 
     private int addLootTableValue(CommandContext<CommandSourceStack> context) {
@@ -218,6 +267,10 @@ public class StructureCommand {
         }
 
         PortalData data = unifiedPortalDataList.get(index);
+        BlockPos offsetPosition =  data.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
+        String tpCommand = "    /execute as @s in " + data.getDimension().location() + " run tp " + offsetPosition.getX() + " " + offsetPosition.getY() + " " + offsetPosition.getZ();
+        MutableComponent tpComponent = new TextComponent(tpCommand).withStyle(ChatFormatting.AQUA);
+        tpComponent.withStyle((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport!"))).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand)));
         MutableComponent cmp = new TextComponent("=== ")
                 .append(new TextComponent("Portal data of index " + index).withStyle(ChatFormatting.AQUA))
                 .append(new TextComponent(" ===\n").withStyle(ChatFormatting.WHITE))
@@ -230,7 +283,8 @@ public class StructureCommand {
                 .append(new TextComponent("    Portal Activation State: ").withStyle(ChatFormatting.LIGHT_PURPLE))
                 .append(new TextComponent(data.getActiveState() + "\n").withStyle(ChatFormatting.YELLOW))
                 .append(new TextComponent("    Portal Dimension: ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                .append(new TextComponent(data.getDimension().location().getPath()).withStyle(ChatFormatting.YELLOW));
+                .append(new TextComponent(data.getDimension().location().getPath() + "\n").withStyle(ChatFormatting.YELLOW))
+                .append(tpComponent);
 
         context.getSource().sendSuccess(cmp, true);
         return 0;
@@ -246,7 +300,12 @@ public class StructureCommand {
         }
 
         int index = new Random().nextInt(unifiedPortalDataList.size());
+
         PortalData data = unifiedPortalDataList.get(index);
+        BlockPos offsetPosition =  data.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
+        String tpCommand = "    /execute as @s in " + data.getDimension().location() + " run tp " + offsetPosition.getX() + " " + offsetPosition.getY() + " " + offsetPosition.getZ();
+        MutableComponent tpComponent = new TextComponent(tpCommand).withStyle(ChatFormatting.AQUA);
+        tpComponent.withStyle((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport!"))).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand)));
         MutableComponent cmp = new TextComponent("=== ")
                 .append(new TextComponent("Portal data of index " + index).withStyle(ChatFormatting.AQUA))
                 .append(new TextComponent(" ===\n").withStyle(ChatFormatting.WHITE))
@@ -259,7 +318,8 @@ public class StructureCommand {
                 .append(new TextComponent("    Portal Activation State: ").withStyle(ChatFormatting.LIGHT_PURPLE))
                 .append(new TextComponent(data.getActiveState() + "\n").withStyle(ChatFormatting.YELLOW))
                 .append(new TextComponent("    Portal Dimension: ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                .append(new TextComponent(data.getDimension().location().getPath()).withStyle(ChatFormatting.YELLOW));
+                .append(new TextComponent(data.getDimension().location().getPath() + "\n").withStyle(ChatFormatting.YELLOW))
+                .append(tpComponent);
 
         context.getSource().sendSuccess(cmp, true);
         return 0;
@@ -273,16 +333,23 @@ public class StructureCommand {
             return 1;
         }
 
-        int ticksRemaining = ServerTickEvent.ticksForPortalSpawn - ServerTickEvent.counter;
+        int ticksRemaining = ServerTickEvent.actlTicksForPortalSpawn - ServerTickEvent.counter;
         int totalSecondsRemaining  = ticksRemaining/20;
+        int totalSecondsRequired = ServerTickEvent.actlTicksForPortalSpawn/20;
 
         int hours = totalSecondsRemaining / 3600;
         int minutes = (totalSecondsRemaining % 3600) / 60;
         int seconds = totalSecondsRemaining % 60;
         String timeFormatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
 
+        int totalHours = totalSecondsRequired / 3600;
+        int totalMinutes = (totalSecondsRequired % 3600) / 60;
+        int totalSeconds = totalSecondsRequired % 60;
+        String defTimeFormatted = String.format("%02d:%02d:%02d", totalHours, totalMinutes, totalSeconds);
+
         MutableComponent cmp = new TextComponent("")
                 .append(new TextComponent("Time until next OverVault portal spawn: ").withStyle(ChatFormatting.GREEN))
+                .append(new TextComponent(defTimeFormatted + "/")).withStyle(ChatFormatting.GRAY)
                 .append(new TextComponent(timeFormatted).withStyle(ChatFormatting.AQUA))
                 .append(new TextComponent(" (HH:MM:SS)").withStyle(ChatFormatting.GRAY));
 
