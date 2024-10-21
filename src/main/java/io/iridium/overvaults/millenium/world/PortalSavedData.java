@@ -33,6 +33,11 @@ public class PortalSavedData extends SavedData {
         return portalDataList;
     }
 
+    public void removePortalData(int index) {
+        portalDataList.remove(index);
+        setDirty();
+    }
+
     public boolean hasActiveOverVault() {
         return portalDataList.stream().anyMatch(PortalData::getActiveState);
     }

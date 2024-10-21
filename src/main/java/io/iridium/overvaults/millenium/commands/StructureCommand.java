@@ -26,6 +26,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.*;
@@ -45,9 +46,23 @@ public class StructureCommand {
     public StructureCommand(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(OverVaults.MOD_ID)
                 .requires(sender -> sender.hasPermission(4))
-                .then(Commands.literal("getStructureWithIndex")
+                .then(Commands.literal("getCollectiveStructureWithIndex")
                         .then(Commands.argument("index", IntegerArgumentType.integer())
-                                .executes(this::getStructureWithIndex)
+                                .executes(this::getCollectiveStructureWithIndex)
+                        )
+                )
+                .then(Commands.literal("getStructureWithIndex")
+                        .then(Commands.argument("dimension", DimensionArgument.dimension())
+                                .then(Commands.argument("index", IntegerArgumentType.integer())
+                                        .executes(this::getStructureWithIndex)
+                                )
+                        )
+                )
+                .then(Commands.literal("removeStructureWithIndex")
+                        .then(Commands.argument("dimension", DimensionArgument.dimension())
+                                .then(Commands.argument("index", IntegerArgumentType.integer())
+                                        .executes(this::removeStructureWithIndex)
+                                )
                         )
                 )
                 .then(Commands.literal("getRandomStructure")
@@ -88,6 +103,58 @@ public class StructureCommand {
                         )
                 )
         );
+    }
+
+    private int removeStructureWithIndex(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerLevel level = DimensionArgument.getDimension(context, "dimension");
+        int index = IntegerArgumentType.getInteger(context, "index");
+        List<PortalData> portalDataList = PortalSavedData.get(level).getPortalData();
+
+        if (index >= portalDataList.size()) {
+            context.getSource().sendFailure(new TextComponent("Index: " + index + " is out of bounds! Max allowed value is: " + (portalDataList.size() - 1)));
+            return 1;
+        }
+
+        portalDataList.remove(index);
+        MutableComponent cmp = new TextComponent("Removed Portal with index: " + index + "\n")
+                .append(new TextComponent("(Note: This portal will be re-added to the List when the chunks are re-loaded)").withStyle(ChatFormatting.GRAY));
+
+        context.getSource().sendSuccess(cmp, true);
+        return 0;
+    }
+
+    private int getStructureWithIndex(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerLevel level = DimensionArgument.getDimension(context, "dimension");
+        int index = IntegerArgumentType.getInteger(context, "index");
+        List<PortalData> portalDataList = PortalSavedData.get(level).getPortalData();
+
+        if (index >= portalDataList.size()) {
+            context.getSource().sendFailure(new TextComponent("Index: " + index + " is out of bounds! Max allowed value is: " + (portalDataList.size() - 1)));
+            return 1;
+        }
+
+        PortalData data = PortalSavedData.get(level).getPortalData().get(index);
+        BlockPos offsetPosition =  data.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
+        String tpCommand = "    /execute as @s in " + data.getDimension().location() + " run tp " + offsetPosition.getX() + " " + offsetPosition.getY() + " " + offsetPosition.getZ();
+        MutableComponent tpComponent = new TextComponent(tpCommand).withStyle(ChatFormatting.AQUA);
+        tpComponent.withStyle((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport!"))).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand)));
+        MutableComponent cmp = new TextComponent("=== ")
+                .append(new TextComponent("Portal data of index " + index).withStyle(ChatFormatting.AQUA))
+                .append(new TextComponent(" ===\n").withStyle(ChatFormatting.WHITE))
+                .append(new TextComponent("    Portal Frame Center Position: ").withStyle(ChatFormatting.LIGHT_PURPLE))
+                .append(new TextComponent(data.getPortalFrameCenterPos() + "\n").withStyle(ChatFormatting.YELLOW))
+                .append(new TextComponent("    Portal size: ").withStyle(ChatFormatting.LIGHT_PURPLE))
+                .append(new TextComponent(data.getSize() + "\n").withStyle(ChatFormatting.YELLOW))
+                .append(new TextComponent("    Portal Rotation: ").withStyle(ChatFormatting.LIGHT_PURPLE))
+                .append(new TextComponent(data.getRotation() + "\n").withStyle(ChatFormatting.YELLOW))
+                .append(new TextComponent("    Portal Activation State: ").withStyle(ChatFormatting.LIGHT_PURPLE))
+                .append(new TextComponent(data.getActiveState() + "\n").withStyle(ChatFormatting.YELLOW))
+                .append(new TextComponent("    Portal Dimension: ").withStyle(ChatFormatting.LIGHT_PURPLE))
+                .append(new TextComponent(data.getDimension().location().getPath() + "\n").withStyle(ChatFormatting.YELLOW))
+                .append(tpComponent);
+
+        context.getSource().sendSuccess(cmp, true);
+        return 0;
     }
 
     private int activateAllPortals(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -233,9 +300,7 @@ public class StructureCommand {
     }
 
 
-
-
-    private int getStructureWithIndex(CommandContext<CommandSourceStack> context) {
+    private int getCollectiveStructureWithIndex(CommandContext<CommandSourceStack> context) {
         MinecraftServer server = context.getSource().getServer();
         int index = IntegerArgumentType.getInteger(context, "index");
 
@@ -272,7 +337,7 @@ public class StructureCommand {
         MutableComponent tpComponent = new TextComponent(tpCommand).withStyle(ChatFormatting.AQUA);
         tpComponent.withStyle((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("Click to teleport!"))).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand)));
         MutableComponent cmp = new TextComponent("=== ")
-                .append(new TextComponent("Portal data of index " + index).withStyle(ChatFormatting.AQUA))
+                .append(new TextComponent("Portal data of Collective index " + index).withStyle(ChatFormatting.AQUA))
                 .append(new TextComponent(" ===\n").withStyle(ChatFormatting.WHITE))
                 .append(new TextComponent("    Portal Frame Center Position: ").withStyle(ChatFormatting.LIGHT_PURPLE))
                 .append(new TextComponent(data.getPortalFrameCenterPos() + "\n").withStyle(ChatFormatting.YELLOW))
