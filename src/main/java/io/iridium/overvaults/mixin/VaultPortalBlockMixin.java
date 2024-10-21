@@ -23,6 +23,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mixin(value = VaultPortalBlock.class)
 public class VaultPortalBlockMixin {
     @Inject(method = "entityInside", at = @At(value = "INVOKE", target = "Liskallia/vault/block/entity/VaultPortalTileEntity;getData()Ljava/util/Optional;", shift = At.Shift.AFTER))
@@ -39,8 +42,9 @@ public class VaultPortalBlockMixin {
                     entityChunkData.removePortalTileEntityData();
                     for (ChunkPos chunkPos : entityChunkData.getForceloadedChunks()) {
                         serverLevel.getChunkSource().removeRegionTicket(TicketType.FORCED, chunkPos, 1, chunkPos);
-                        entityChunkData.removeChunkPositionData();
+                        //entityChunkData.removeChunkPositionData();
                     }
+                    entityChunkData.removeChunkPositionData();
                 }
             }
         }
