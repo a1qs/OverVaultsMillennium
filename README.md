@@ -24,12 +24,12 @@ It can be added to existing worlds, however only new chunks will be able to spaw
 In this version of OverVaults, forked from [OverVaults](https://github.com/IridiumIO/OverVaults) there are a few additional features, such as:
 
 * Portals may now be automatically ***activated***, having various traits
-    * These will activate based on a timer set in the `overvaults-server.toml` config file
+    * These will activate based on a timer (can be a random range) set in the `overvaults-server.toml` config file
     * While its active, the chunks that the portal is in will be loaded during the duration
     * All OverVault Portals may either be a Raw Vault, or a Normal Vault with special modifiers
     * Each OverVault Portal can have various modifiers assigned to it.
-    * Each `x` seconds it may remove a random modifier assigned to that OverVault Portal (Shrinks 1 modifier stack, e.g. 10x Energizing -> 9x Energizing)
-    * There may only be one active portal at a time.
+    * Each `x` seconds (can be a range) it may remove a random modifier assigned to that OverVault Portal (Shrinks 1 modifier stack, e.g. 10x Energizing -> 9x Energizing)
+    * There may only be one active portal at a time. (does not affect the activateAllPortals command)
     * A message gets sent to each player except for players currently inside a Vault, noting the approx. position of the Portal (last 2 digits obfuscated)
     * Players with a Vault Compass will have their compasses pointing towards the Portal if they are in the same dimension
     * Each Dimension has the same chance of being chosen, assuming they all have a valid Portal, then one of the Portals in the Dimension will be chosen to be activated
@@ -46,7 +46,10 @@ In this version of OverVaults, forked from [OverVaults](https://github.com/Iridi
     * `/overvaults getActiveOverVault` -> returns the current active Vault with position, rotation, tp command and more
     * `/overvaults getNextOverVaultSpawn` -> returns the time until a new attempt is made to spawn an active OverVault
     * `/overvaults getRandomStructure` -> returns a random valid overvault structure with position, rotation, etc.
-    * `/overvaults getStructureWithIndex` -> returns a valid overvault structure with the given index
+    * `/overvaults getStructureWithIndex` -> returns a valid overvault structure with the given index and the dimension
+    * `/overvaults removeStructureWithIndex` -> removes a valid overvault structure with the given index and the dimension
+    * `/overvaults getCollectiveStructureWithIndex` -> returns a valid overvault structure with the given index, combining all valid portals
+    * `/overvaults activateAllPortals` -> activates all Overvaults. Debug purposes ONLY.
     * `/overvaults removeItemFromLootTable {"ResourceLocation"} {"modid:itemname"}` -> removes the first item found in the loottable that matches - suggests the ResourceLocation if the mod is installed client-side
     * `/overvaults addLootTableEntry {"ResourceLocation"} {"WeightPool"} {"modid:itemname"} {"ItemWeight"} {"ItemMinRoll"} {"ItemMaxRoll"}` -> adds a Item entry to the selected loottable to the pool selected via the weight with the given values - suggests the ResourceLocation & the WeightPool if the mod is installed client-side 
 
