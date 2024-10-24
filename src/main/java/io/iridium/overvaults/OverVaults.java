@@ -3,6 +3,7 @@ package io.iridium.overvaults;
 import com.mojang.logging.LogUtils;
 import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.event.DimensionChangeEvent;
+import io.iridium.overvaults.millenium.event.OnPlayerLogin;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;
 import io.iridium.overvaults.millenium.event.StructureTrackingEventHandler;
 import io.iridium.overvaults.world.structure.ModStructures;
@@ -57,6 +58,7 @@ public class OverVaults {
         MinecraftForge.EVENT_BUS.register(StructureTrackingEventHandler.class);
         MinecraftForge.EVENT_BUS.addListener(ServerTickEvent::onServerTick);
         MinecraftForge.EVENT_BUS.addListener(DimensionChangeEvent::onDimensionChange);
+        MinecraftForge.EVENT_BUS.addListener(OnPlayerLogin::onPlayerLoginEvent);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, "overvaults-server.toml");
 
         ModStructures.register(modEventBus);
