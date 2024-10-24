@@ -82,7 +82,7 @@ public class ServerTickEvent {
                         PortalData data = PortalUtil.getRandomPortalData(portalDataList);
 
                         server.getPlayerList().getPlayers().forEach(player -> {
-                            if(ServerConfig.INFORM_PLAYERS_IN_VAULTS.get()) {
+                            if(!ServerConfig.INFORM_PLAYERS_IN_VAULTS.get()) {
                                 if (player.getLevel() instanceof VirtualWorld) return; // Skip players inside a vault
                             }
 
