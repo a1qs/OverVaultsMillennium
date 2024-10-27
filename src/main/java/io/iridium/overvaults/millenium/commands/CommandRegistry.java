@@ -19,9 +19,6 @@ public class CommandRegistry {
 
     public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         registerCommand(StructureCommands::new, dispatcher);
-        registerCommand(DebugCommands::new, dispatcher);
-        registerCommand(InfoCommands::new, dispatcher);
-
         registerCommand(LootTableCommands::new, dispatcher);
     }
 
