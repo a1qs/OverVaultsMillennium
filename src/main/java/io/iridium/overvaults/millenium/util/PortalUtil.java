@@ -1,5 +1,6 @@
 package io.iridium.overvaults.millenium.util;
 
+import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
@@ -9,6 +10,7 @@ import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -97,5 +99,32 @@ public class PortalUtil {
         });
 
         return vaultPortalTileEntities;
+    }
+
+    /**
+     * Helper method to get the Closest Portal to the player
+     *
+     * @param player the Player which the distance gets checked of
+     * @return a Pair containing an Integer (index of the Portal) & a Double (the distance between the Portal & the Player)
+     */
+    public static Pair<Integer, Double> getClosestPortalDataIndexAndDistance(ServerPlayer player) {
+        PortalSavedData portalData = PortalSavedData.get(player.getLevel());
+        BlockPos playerPos = player.blockPosition();
+
+        List<PortalData> allPortalData = portalData.getPortalData();
+        int closestIndex = -1;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (int i = 0; i < allPortalData.size(); i++) {
+            PortalData data = allPortalData.get(i);
+            double distance = data.getPortalFrameCenterPos().distSqr(playerPos);
+
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestIndex = i;
+            }
+        }
+
+        return closestIndex == -1 ? null : new Pair<>(closestIndex, Math.sqrt(closestDistance));
     }
 }
