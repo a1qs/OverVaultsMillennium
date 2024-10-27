@@ -19,9 +19,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -45,6 +43,7 @@ public class StructureCommands extends BaseCommand {
     public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
         builder.then(Commands.literal("removeStructureWithIndex").then(Commands.argument("dimension", DimensionArgument.dimension()).then(Commands.argument("index", IntegerArgumentType.integer()).executes(this::removeStructureWithIndex))));
         builder.then(Commands.literal("getStructureWithIndex").then(Commands.argument("dimension", DimensionArgument.dimension()).then(Commands.argument("index", IntegerArgumentType.integer()).executes(this::getStructureWithIndex))));
+        builder.then(Commands.literal("getStructureList").then(Commands.argument("dimension", DimensionArgument.dimension()).executes(this::getStructureList)));
         builder.then(Commands.literal("getClosestStructure").executes(this::getClosestStructure));
         builder.then(Commands.literal("getRandomStructure").executes(this::getRandomStructure));
         builder.then(Commands.literal("getActiveOverVault").executes(this::getActiveOverVault));
@@ -54,6 +53,32 @@ public class StructureCommands extends BaseCommand {
         builder.then(Commands.literal("deactivateActivePortal").executes(this::deactivateActivePortal));
     }
 
+    private int getStructureList(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerLevel level = DimensionArgument.getDimension(context, "dimension");
+        PortalSavedData savedData = PortalSavedData.get(level);
+
+        MutableComponent cmp = new TextComponent("===") //todo: limit integer that gets passed in potentially?
+                .append(new TextComponent(" Portal Data List ").withStyle(ChatFormatting.AQUA))
+                .append(new TextComponent("==="));
+
+        int count = 0;
+        for(PortalData data : savedData.getPortalData()) {
+            cmp.append("\n");
+            count++;
+            BlockPos offsetPosition =  data.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
+            String tpCommand = "/execute as @s in " + data.getDimension().location() + " run tp " + offsetPosition.getX() + " " + offsetPosition.getY() + " " + offsetPosition.getZ();
+            MutableComponent tpComponent = new TextComponent(" [Teleport!]").withStyle(ChatFormatting.AQUA);
+            tpComponent.withStyle((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("tpCommand"))).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand)));
+            cmp.append(new TextComponent(count + ". ").withStyle(ChatFormatting.YELLOW));
+            cmp.append(new TextComponent("X: " + data.getPortalFrameCenterPos().getX() + " Y: " + data.getPortalFrameCenterPos().getY() + " Z: " + data.getPortalFrameCenterPos().getZ()));
+            cmp.append(tpComponent);
+
+        }
+
+        context.getSource().sendSuccess(cmp, false);
+
+        return 0;
+    }
 
 
     private int getNextOverVaultSpawn(CommandContext<CommandSourceStack> context) {
