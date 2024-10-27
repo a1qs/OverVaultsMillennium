@@ -6,10 +6,7 @@ import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.CrystalData;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
@@ -26,24 +23,7 @@ public class PortalUtil {
         return portalDataList.get(new Random().nextInt(portalDataList.size()));
     }
 
-    public static MutableComponent obfuscateLastTwoDigits(int number) {
-        // Convert the number to a string
-        String numberStr = Integer.toString(number);
-        char[] charArray = numberStr.toCharArray();
-        if(numberStr.length() == 1) {
-            return new TextComponent(numberStr).withStyle(ChatFormatting.OBFUSCATED);
-        }
-        // Check the length of the string
-        char lastDigit = charArray[charArray.length-1];
-        char secondToLastDigit = charArray[charArray.length-2];
 
-        String prefix = numberStr.substring(0, numberStr.length() - 2);
-
-
-        MutableComponent obfuscatedPart = new TextComponent("" + secondToLastDigit + lastDigit).withStyle(ChatFormatting.OBFUSCATED);
-
-        return new TextComponent(prefix).append(obfuscatedPart);
-    }
 
     public static List<PortalData> getAllLevelPortalData(@NotNull MinecraftServer server) {
         List<ServerLevel> dimensions = Arrays.asList(
