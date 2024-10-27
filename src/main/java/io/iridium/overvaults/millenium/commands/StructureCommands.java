@@ -256,7 +256,7 @@ public class StructureCommands extends BaseCommand {
 
                 data.setActiveState(true);
                 portalSavedData.setDirty();
-                context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(level, data), ChatType.SYSTEM, Util.NIL_UUID);
+                context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(data), ChatType.SYSTEM, Util.NIL_UUID);
             }
         }
         return 0;

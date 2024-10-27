@@ -5,11 +5,8 @@ import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.util.TextUtil;
 import io.iridium.overvaults.millenium.world.PortalData;
-import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,7 +25,7 @@ public class OnPlayerLogin {
                 MiscUtil.sendCompassInfo(player.getLevel(), data.getPortalFrameCenterPos());
             }
 
-            player.sendMessage(TextUtil.loginComponent(player.getLevel(), data), ChatType.SYSTEM, Util.NIL_UUID);
+            player.sendMessage(TextUtil.loginComponent(data), ChatType.SYSTEM, Util.NIL_UUID);
         }
     }
 }
