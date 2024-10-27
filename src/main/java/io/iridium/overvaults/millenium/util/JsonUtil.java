@@ -12,7 +12,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class JsonUtils {
+public class JsonUtil {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static JsonObject readJsonFile(File file) {
@@ -38,6 +38,6 @@ public class JsonUtils {
         Path gameDir = FMLPaths.GAMEDIR.get();
         Path fullPath = gameDir.resolve(VaultRegistry.LOOT_TABLE.getKey(lootTablelocation).get(Version.latest()).getPath());
 
-        return JsonUtils.readJsonFile(fullPath.toFile());
+        return JsonUtil.readJsonFile(fullPath.toFile());
     }
 }
