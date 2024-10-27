@@ -1,9 +1,10 @@
 package io.iridium.overvaults.millenium.event;
 
 import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
+import io.iridium.overvaults.millenium.util.TextUtil;
 import io.iridium.overvaults.millenium.world.PortalData;
-import iskallia.vault.core.world.storage.VirtualWorld;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.network.chat.ChatType;
@@ -24,22 +25,10 @@ public class OnPlayerLogin {
             if (data == null) return;
 
             if (data.getDimension() == player.getLevel().dimension()) {
-                ServerTickEvent.sendCompassInfo(player.getLevel(), data.getPortalFrameCenterPos());
+                MiscUtil.sendCompassInfo(player.getLevel(), data.getPortalFrameCenterPos());
             }
 
-            MutableComponent cmp = new TextComponent("You sense that a mysterious energy is resonating in " + player.getLevel().dimension().location().getPath() + " at ")
-                    .withStyle(ChatFormatting.DARK_PURPLE)
-                    .append(PortalUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()))
-                    .append(", ")
-                    .append(PortalUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()))
-                    .append(", ")
-                    .append(PortalUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()))
-                    .withStyle(ChatFormatting.RESET)
-                    .withStyle(ChatFormatting.LIGHT_PURPLE);
-
-
-            player.sendMessage(cmp, ChatType.SYSTEM, Util.NIL_UUID);
-
+            player.sendMessage(TextUtil.loginComponent(player.getLevel(), data), ChatType.SYSTEM, Util.NIL_UUID);
         }
     }
 }

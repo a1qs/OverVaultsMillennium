@@ -34,20 +34,10 @@ public class TextUtil {
     }
 
     public static MutableComponent getPortalAppearComponent(Level level, PortalData data) {
-        MutableComponent dimension;
-        if(level.dimension().equals(Level.OVERWORLD)) {
-            dimension = new TextComponent("the Overworld").withStyle(ChatFormatting.YELLOW);
-        } else if (level.dimension().equals(Level.NETHER)) {
-            dimension = new TextComponent("the Nether").withStyle(ChatFormatting.RED);
-        } else if (level.dimension().equals(Level.END)) {
-            dimension = new TextComponent("the End").withStyle(ChatFormatting.DARK_AQUA);
-        } else {
-            dimension = new TextComponent("Report this").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_RED);
-            OverVaults.LOGGER.warn("Chosen dimension for a new active portal was not the overworld, nether, or end.");
-        }
+
 
         return new TextComponent("A mysterious energy has appeared in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                .append(dimension)
+                .append(dimensionComponent(level))
                 .append(new TextComponent(" at ").withStyle(ChatFormatting.DARK_PURPLE))
                 .append("" + data.getPortalFrameCenterPos().getX())
                 .append(", ")
@@ -75,5 +65,32 @@ public class TextUtil {
         MutableComponent obfuscatedPart = new TextComponent("" + secondToLastDigit + lastDigit).withStyle(ChatFormatting.OBFUSCATED);
 
         return new TextComponent(prefix).append(obfuscatedPart);
+    }
+
+    public static MutableComponent loginComponent(Level level, PortalData data) {
+        return new TextComponent("You sense that a mysterious energy is resonating in ").withStyle(ChatFormatting.LIGHT_PURPLE)
+                .append(dimensionComponent(level))
+                .append(new TextComponent( " at ").withStyle(ChatFormatting.LIGHT_PURPLE))
+                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()))
+                .append(", ")
+                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()))
+                .append(", ")
+                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()))
+                .withStyle(ChatFormatting.RESET)
+                .withStyle(ChatFormatting.LIGHT_PURPLE);
+    }
+
+    private static MutableComponent dimensionComponent(Level level) {
+        if(level.dimension().equals(Level.OVERWORLD)) {
+            return new TextComponent("the Overworld").withStyle(ChatFormatting.YELLOW);
+        } else if (level.dimension().equals(Level.NETHER)) {
+            return new TextComponent("the Nether").withStyle(ChatFormatting.RED);
+        } else if (level.dimension().equals(Level.END)) {
+            return new TextComponent("the End").withStyle(ChatFormatting.DARK_AQUA);
+        } else {
+            OverVaults.LOGGER.warn("Chosen dimension for a new active portal was not the overworld, nether, or end.");
+            return new TextComponent("Report this").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_RED);
+
+        }
     }
 }
