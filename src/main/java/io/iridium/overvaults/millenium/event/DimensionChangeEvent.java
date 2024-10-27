@@ -2,6 +2,7 @@ package io.iridium.overvaults.millenium.event;
 
 
 import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.world.PortalData;
 import net.minecraft.server.level.ServerLevel;
@@ -22,7 +23,7 @@ public class DimensionChangeEvent {
             PortalData data = PortalUtil.getAllLevelActivePortalData(ServerLifecycleHooks.getCurrentServer());
             if (data == null) return;
             if (data.getDimension() == event.getTo()) {
-                ServerTickEvent.sendCompassInfo(level, data.getPortalFrameCenterPos());
+                MiscUtil.sendCompassInfo(level, data.getPortalFrameCenterPos());
             }
         }
     }
