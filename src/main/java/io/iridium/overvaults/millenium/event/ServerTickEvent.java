@@ -2,25 +2,20 @@ package io.iridium.overvaults.millenium.event;
 
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
+import io.iridium.overvaults.millenium.util.TextUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
-import iskallia.vault.core.Version;
-import iskallia.vault.core.data.compound.IdentifierList;
-import iskallia.vault.core.data.sync.SyncMode;
-import iskallia.vault.core.vault.*;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.crystal.CrystalData;
-import iskallia.vault.network.message.VaultMessage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -33,7 +28,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
@@ -89,11 +83,11 @@ public class ServerTickEvent {
                             if(ServerConfig.BROADCAST_IN_CHAT.get()) {
                                 MutableComponent cmp = new TextComponent("A mysterious energy has appeared in " + level.dimension().location().getPath() + " at ")
                                         .withStyle(ChatFormatting.DARK_PURPLE)
-                                        .append(PortalUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()))
+                                        .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()))
                                         .append(", ")
-                                        .append(PortalUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()))
+                                        .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()))
                                         .append(", ")
-                                        .append(PortalUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()))
+                                        .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()))
                                         .withStyle(ChatFormatting.RESET)
                                         .withStyle(ChatFormatting.LIGHT_PURPLE);
 
@@ -116,7 +110,7 @@ public class ServerTickEvent {
                         entityChunkData.setDirty();
 
                         data.setActiveState(true);
-                        if(ServerConfig.UPDATE_VAULT_COMPASS.get()) sendCompassInfo(level, data.getPortalFrameCenterPos());
+                        if(ServerConfig.UPDATE_VAULT_COMPASS.get()) MiscUtil.sendCompassInfo(level, data.getPortalFrameCenterPos());
                         portalSavedData.setDirty();
 
                         actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
@@ -204,34 +198,7 @@ public class ServerTickEvent {
 
     }
 
-    /**
-     * Method to inform clients in the same Level as the Overvault about it being opened, sending Vault Compass info
-     *
-     * @param level Used to send the VaultMessage.Sync to each player in the Level
-     * @param pos Position where the Vault Compass will point to
-     */
-    public static void sendCompassInfo(ServerLevel level, BlockPos pos) {
-        level.getPlayers(serverPlayer -> true).forEach(serverPlayer -> {
-            Vault vault = new Vault();
-            WorldManager worldManager = new WorldManager();
-            ClassicPortalLogic portalLogic = new ClassicPortalLogic();
-            iskallia.vault.core.vault.PortalData.List portalDataList = new iskallia.vault.core.vault.PortalData.List();
-            iskallia.vault.core.vault.PortalData portal = new iskallia.vault.core.vault.PortalData();
-            IdentifierList entranceIdentifier = IdentifierList.create();
-            entranceIdentifier.add(ClassicPortalLogic.ENTRANCE);
-            portal.set(iskallia.vault.core.vault.PortalData.TAGS,entranceIdentifier);
-            portal.set(iskallia.vault.core.vault.PortalData.MIN, pos.relative(Direction.NORTH,-5));
-            portal.set(iskallia.vault.core.vault.PortalData.MAX, pos.relative(Direction.NORTH,-5));
-            portalDataList.add(portal);
-            portalLogic.set(PortalLogic.DATA, portalDataList);
-            worldManager.set(WorldManager.PORTAL_LOGIC, portalLogic);
-            worldManager.set(WorldManager.FACING, Direction.NORTH);
-            vault.set(Vault.WORLD, worldManager);
-            vault.set(Vault.VERSION, Version.latest());
-            vault.set(Vault.MODIFIERS, new Modifiers());
-            ModNetwork.CHANNEL.sendTo(new VaultMessage.Sync(serverPlayer, vault, SyncMode.FULL), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
-        });
-    }
+
 
     /**
      * Handles the removal of modifiers of Vault Portals
