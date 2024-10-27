@@ -89,8 +89,8 @@ public class StructureCommands extends BaseCommand {
             return 1;
         }
 
-        int[] timeRemaining = MiscUtil.convertTime(ServerTickEvent.actlTicksForPortalSpawn - ServerTickEvent.counter);
-        int[] timeRequired = MiscUtil.convertTime(ServerTickEvent.actlTicksForPortalSpawn);
+        int[] timeRemaining = MiscUtil.convertTime((ServerTickEvent.actlTicksForPortalSpawn - ServerTickEvent.counter)/20);
+        int[] timeRequired = MiscUtil.convertTime(ServerTickEvent.actlTicksForPortalSpawn/20);
 
         String timeFormatted = MiscUtil.formatTime(timeRemaining);
         String defTimeFormatted = MiscUtil.formatTime(timeRequired);
@@ -256,7 +256,7 @@ public class StructureCommands extends BaseCommand {
 
                 data.setActiveState(true);
                 portalSavedData.setDirty();
-                context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(data), ChatType.SYSTEM, Util.NIL_UUID);
+                context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(data, false), ChatType.SYSTEM, Util.NIL_UUID);
             }
         }
         return 0;
