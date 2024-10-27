@@ -54,9 +54,9 @@ public class ServerTickEvent {
                 server.getLevel(Level.END)
         );
 
-        List<ServerLevel> validDimensions = dimensions.stream()
+        List<ServerLevel> validDimensions = new ArrayList<>(dimensions.stream()
                 .filter(Objects::nonNull)
-                .toList();
+                .toList());
 
         if(actlTicksForPortalSpawn == -1) actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
 
@@ -66,6 +66,8 @@ public class ServerTickEvent {
                 boolean foundPortal = false;
 
                 // Try each dimension until a valid portal is found
+                Collections.shuffle(validDimensions);
+
                 for (ServerLevel level : validDimensions) {
                     PortalSavedData portalSavedData = PortalSavedData.get(level);
                     List<PortalData> portalDataList = portalSavedData.getPortalData();
