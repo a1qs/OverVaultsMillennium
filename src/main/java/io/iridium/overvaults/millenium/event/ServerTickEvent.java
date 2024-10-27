@@ -82,24 +82,8 @@ public class ServerTickEvent {
                                 if (player.getLevel() instanceof VirtualWorld) return; // Skip players inside a vault
                             }
 
-                            if(ServerConfig.BROADCAST_IN_CHAT.get()) {
-                                MutableComponent cmp = new TextComponent("A mysterious energy has appeared in " + level.dimension().location().getPath() + " at ")
-                                        .withStyle(ChatFormatting.DARK_PURPLE)
-                                        .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()))
-                                        .append(", ")
-                                        .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()))
-                                        .append(", ")
-                                        .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()))
-                                        .withStyle(ChatFormatting.RESET)
-                                        .withStyle(ChatFormatting.LIGHT_PURPLE);
-
-
-                                player.sendMessage(cmp, ChatType.SYSTEM, Util.NIL_UUID);
-                            }
-
-                            if(ServerConfig.PLAY_SOUND_ON_OPEN.get()) {
-                                player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
-                            }
+                            if(ServerConfig.BROADCAST_IN_CHAT.get()) player.sendMessage(TextUtil.getPortalAppearComponent(data, true), ChatType.SYSTEM, Util.NIL_UUID);
+                            if(ServerConfig.PLAY_SOUND_ON_OPEN.get()) player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
                         });
 
 
