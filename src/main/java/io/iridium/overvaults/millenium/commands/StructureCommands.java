@@ -64,15 +64,15 @@ public class StructureCommands extends BaseCommand {
         int count = 0;
         for(PortalData data : savedData.getPortalData()) {
             cmp.append("\n");
-            count++;
+
             BlockPos offsetPosition =  data.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
             String tpCommand = "/execute as @s in " + data.getDimension().location() + " run tp " + offsetPosition.getX() + " " + offsetPosition.getY() + " " + offsetPosition.getZ();
             MutableComponent tpComponent = new TextComponent(" [Teleport!]").withStyle(ChatFormatting.AQUA);
             tpComponent.withStyle((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("tpCommand"))).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand)));
-            cmp.append(new TextComponent(count + ". ").withStyle(ChatFormatting.YELLOW));
+            cmp.append(new TextComponent("Index " + count + ". ").withStyle(ChatFormatting.YELLOW));
             cmp.append(new TextComponent("X: " + data.getPortalFrameCenterPos().getX() + " Y: " + data.getPortalFrameCenterPos().getY() + " Z: " + data.getPortalFrameCenterPos().getZ()));
             cmp.append(tpComponent);
-
+            count++;
         }
 
         context.getSource().sendSuccess(cmp, false);
