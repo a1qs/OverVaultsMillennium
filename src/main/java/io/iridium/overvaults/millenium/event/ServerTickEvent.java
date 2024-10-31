@@ -1,5 +1,7 @@
 package io.iridium.overvaults.millenium.event;
 
+import fr.denisd3d.mc2discord.core.Mc2Discord;
+import fr.denisd3d.mc2discord.core.MessageManager;
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.util.MiscUtil;
@@ -13,6 +15,7 @@ import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -22,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
@@ -76,7 +80,14 @@ public class ServerTickEvent {
                             if(ServerConfig.PLAY_SOUND_ON_OPEN.get()) player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
                         });
 
-                        if(ServerConfig.BROADCAST_IN_CHAT.get()) MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
+                        if(ServerConfig.BROADCAST_IN_CHAT.get()) {
+                            Component cmp = TextUtil.getPortalAppearComponent(data, true);
+                            MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
+
+                            if (ModList.get().isLoaded("mc2discord")) {
+                                MessageManager.sendMessage(List.of("overvaults"), cmp.getString(), MessageManager.default_username, MessageManager.default_avatar);
+                            }
+                        }
 
                         List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(level, data);
 
