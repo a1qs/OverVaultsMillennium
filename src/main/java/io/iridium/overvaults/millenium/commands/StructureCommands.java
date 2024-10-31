@@ -57,7 +57,7 @@ public class StructureCommands extends BaseCommand {
         ServerLevel level = DimensionArgument.getDimension(context, "dimension");
         PortalSavedData savedData = PortalSavedData.get(level);
 
-        MutableComponent cmp = new TextComponent("===") //todo: limit integer that gets passed in potentially?
+        MutableComponent cmp = new TextComponent("===")
                 .append(new TextComponent(" Portal Data List ").withStyle(ChatFormatting.AQUA))
                 .append(new TextComponent("==="));
 
@@ -73,6 +73,11 @@ public class StructureCommands extends BaseCommand {
             cmp.append(new TextComponent("X: " + data.getPortalFrameCenterPos().getX() + " Y: " + data.getPortalFrameCenterPos().getY() + " Z: " + data.getPortalFrameCenterPos().getZ()));
             cmp.append(tpComponent);
             count++;
+        }
+
+        if(count >= 99) {
+            cmp.append(new TextComponent("\n Only displayed the first 100 Entries").withStyle(ChatFormatting.RED));
+            return 1;
         }
 
         context.getSource().sendSuccess(cmp, false);
