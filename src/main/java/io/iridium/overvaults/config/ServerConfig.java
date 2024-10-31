@@ -14,7 +14,6 @@ public class ServerConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> BROADCAST_IN_CHAT;
     public static final ForgeConfigSpec.ConfigValue<Boolean> PLAY_SOUND_ON_OPEN;
     public static final ForgeConfigSpec.ConfigValue<Boolean> UPDATE_VAULT_COMPASS;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> INFORM_PLAYERS_IN_VAULTS;
 
 
     public static final ForgeConfigSpec.ConfigValue<Integer> MIN_SECONDS_UNTIL_PORTAL_SPAWN;
@@ -54,9 +53,6 @@ public class ServerConfig {
 
         UPDATE_VAULT_COMPASS = BUILDER.comment("Whether the Vault Compass should be updated upon switching Dimensions/an OverVault opening")
                 .define("UPDATE_VAULT_COMPASS", true);
-
-        INFORM_PLAYERS_IN_VAULTS = BUILDER.comment("Whether Players inside of Vaults should also be informed about an OverVault opening.")
-                .define("INFORM_PLAYERS_IN_VAULTS", true);
 
         BUILDER.pop();
 
