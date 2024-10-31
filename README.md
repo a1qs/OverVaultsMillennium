@@ -42,14 +42,35 @@ In this version of OverVaults, forked from [OverVaults](https://github.com/Iridi
 * Upon entering, the players Vault Level will be used for the vault who entered
 * Portal Tile Entities & Chunks force-loaded while there is an active OverVault will be saved and perserved on server crashes/restarts
 * If a Portal has been broken by a player/any other way, on the next check for modifier removal, the portal will be verified, and if its not present, its associated data will be removed and the counter for an active OverVault will restart
-* Added new Commands:
-    * `/overvaults getActiveOverVault` -> returns the current active Vault with position, rotation, tp command and more
-    * `/overvaults getNextOverVaultSpawn` -> returns the time until a new attempt is made to spawn an active OverVault
-    * `/overvaults getRandomStructure` -> returns a random valid overvault structure with position, rotation, etc.
-    * `/overvaults getStructureWithIndex` -> returns a valid overvault structure with the given index and the dimension
-    * `/overvaults removeStructureWithIndex` -> removes a valid overvault structure with the given index and the dimension
-    * `/overvaults getCollectiveStructureWithIndex` -> returns a valid overvault structure with the given index, combining all valid portals
-    * `/overvaults activateAllPortals` -> activates all Overvaults. Debug purposes ONLY.
-    * `/overvaults removeItemFromLootTable {"ResourceLocation"} {"modid:itemname"}` -> removes the first item found in the loottable that matches - suggests the ResourceLocation if the mod is installed client-side
-    * `/overvaults addLootTableEntry {"ResourceLocation"} {"WeightPool"} {"modid:itemname"} {"ItemWeight"} {"ItemMinRoll"} {"ItemMaxRoll"}` -> adds a Item entry to the selected loottable to the pool selected via the weight with the given values - suggests the ResourceLocation & the WeightPool if the mod is installed client-side 
-
+- Added new commands
+    - `/overvaults structures activateAllPortals` 
+        - Activates all the valid structures in the world, this command is only meant for debug purposes and may mess things up if used on an active server
+    - `/overvaults structures activateRandomPortal`
+        - Activates a random Overvault portal the same it would as the random tick counter.
+    - `/overvaults structures deactivateActivePortal`
+        - Finds the first active portal and deactivates it (removing it from the data information, currently doesnt remove the portal blocks)
+    - `/overvaults structures getActiveOverVault` 
+        - Returns the active Overvault structure with its index, position, tp command, etc.
+    - `/overvaults structures getClosestStructure`
+        - Returns the closest Overvault structure to the player.
+    - `/overvaults structures getNextOverVaultSpawn`
+        - Returns the time required for the next Overvault to spawn alongside its initial starting time.
+    - `/overvaults structures getRandomStructure`
+        - Returns a random structure that is considered valid in any dimension.
+    - `/overvaults structures getStructureList {ResourceLocation: dimension}`
+        - Lists all the valid structures coordinates found in the given dimension alongside its Index & a command to teleport to it.
+    - `/overvaults structures getStructureWithIndex {ResourceLocation: dimension} {Integer: index}`
+        - Returns the Structure that matches the given Dimension & index.
+    - `/overvaults structures removeStructureWithIndex {ResourceLocation: dimension} {Integer: index}`
+        - Removes the Structure that matches the given Dimension & index.
+    - `/overvaults lootTables addLootTableEntry {ResourceLocation: LootTable} {Integer: WeightPool} {String: NewItemId} {Integer: NewItemWeight} {Integer: NewItemMinRoll} {Integer: NewItemMaxRoll}`
+        - Adds a Loot table entry with the given parameters to the LootTable, may not function with every Loottable due to how they differ inbetween eachother.
+    - `/overvaults lootTables removeItemFromLootTable {ResourceLocation: LootTable} {String: RemovalItemId}`
+        - Removes the first matching LootTable entry with the given Item id.
+        *Returns the Structure that matches the given Dimension & index.
+    *`/overvaults structures removeStructureWithIndex {ResourceLocation: dimension} {Integer: index}`
+        *Removes the Structure that matches the given Dimension & index.
+    *`/overvaults lootTables addLootTableEntry {ResourceLocation: LootTable} {Integer: WeightPool} {String: NewItemId} {Integer: NewItemWeight} {Integer: NewItemMinRoll} {Integer: NewItemMaxRoll}`
+        *Adds a Loot table entry with the given parameters to the LootTable, may not function with every Loottable due to how they differ inbetween eachother.
+    *`/overvaults lootTables removeItemFromLootTable {ResourceLocation: LootTable} {String: RemovalItemId}`
+        *Removes the first matching LootTable entry with the given Item id.
