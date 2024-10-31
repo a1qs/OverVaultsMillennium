@@ -10,15 +10,9 @@ import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
-import iskallia.vault.core.world.storage.VirtualWorld;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.CrystalData;
-import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -66,6 +60,7 @@ public class ServerTickEvent {
                 boolean foundPortal = false;
 
                 // Try each dimension until a valid portal is found
+                // Shuffle the list
                 Collections.shuffle(validDimensions);
 
                 for (ServerLevel level : validDimensions) {
@@ -78,14 +73,10 @@ public class ServerTickEvent {
                         PortalData data = PortalUtil.getRandomPortalData(portalDataList);
 
                         server.getPlayerList().getPlayers().forEach(player -> {
-                            if(!ServerConfig.INFORM_PLAYERS_IN_VAULTS.get()) {
-                                if (player.getLevel() instanceof VirtualWorld) return; // Skip players inside a vault
-                            }
-
-                            if(ServerConfig.BROADCAST_IN_CHAT.get()) player.sendMessage(TextUtil.getPortalAppearComponent(data, true), ChatType.SYSTEM, Util.NIL_UUID);
                             if(ServerConfig.PLAY_SOUND_ON_OPEN.get()) player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
                         });
 
+                        if(ServerConfig.BROADCAST_IN_CHAT.get()) MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
 
                         List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(level, data);
 

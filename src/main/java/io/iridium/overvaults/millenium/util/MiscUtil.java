@@ -6,10 +6,15 @@ import iskallia.vault.core.data.sync.SyncMode;
 import iskallia.vault.core.vault.*;
 import iskallia.vault.init.ModNetwork;
 import iskallia.vault.network.message.VaultMessage;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class MiscUtil {
     /**
@@ -50,5 +55,13 @@ public class MiscUtil {
 
     public static String formatTime(int[] time) {
         return String.format("%02d:%02d:%02d", time[0], time[1], time[2]);
+    }
+
+    public static void broadcast(Component message) {
+        MinecraftServer srv = ServerLifecycleHooks.getCurrentServer();
+        if (srv != null) {
+            srv.getPlayerList().broadcastMessage(message, ChatType.CHAT, Util.NIL_UUID);
+        }
+
     }
 }
