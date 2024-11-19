@@ -147,12 +147,12 @@ public class StructureTrackingEventHandler {
                             //Config check whether to respect World Border when adding Valid Structures
                             if(ServerConfig.RESPECT_WORLD_BORDER.get()) {
                                 if(worldBorder.isWithinBounds(portalFramePos)) {
-                                    PortalData portalData = new PortalData(rotation, portalFramePos, structureRotationOffsets.get(templateName).getFirst(), level.dimension(), false);
+                                    PortalData portalData = new PortalData(rotation, portalFramePos, structureRotationOffsets.get(templateName).getFirst(), level.dimension(), false, -1);
                                     savedData.addPortalData(portalData);
                                     //size.getBlockPositions(portalFramePos, rotation).forEach(position -> System.out.println("Block at: " + position));
                                 }
                             } else {
-                                PortalData portalData = new PortalData(rotation, portalFramePos, structureRotationOffsets.get(templateName).getFirst(), level.dimension(), false);
+                                PortalData portalData = new PortalData(rotation, portalFramePos, structureRotationOffsets.get(templateName).getFirst(), level.dimension(), false, -1);
                                 savedData.addPortalData(portalData);
                             }
 
