@@ -11,14 +11,15 @@ public class PortalData {
     private final StructureSize size;
     private final ResourceKey<Level> dimension;
     private boolean activated;
+    private int modifiersRemoved;
 
-
-    public PortalData(Rotation rotation, BlockPos portalFrameCenterPos, StructureSize size, ResourceKey<Level> dimension, boolean activated) {
+    public PortalData(Rotation rotation, BlockPos portalFrameCenterPos, StructureSize size, ResourceKey<Level> dimension, boolean activated, int modifiersRemoved) {
         this.rotation = rotation;
         this.portalFrameCenterPos = portalFrameCenterPos;
         this.size = size;
         this.activated = activated;
         this.dimension = dimension;
+        this.modifiersRemoved = modifiersRemoved;
     }
 
     public Rotation getRotation() {
@@ -43,6 +44,18 @@ public class PortalData {
 
     public void setActiveState(boolean state) {
         activated = state;
+    }
+
+    public int getModifiersRemoved() {
+        return modifiersRemoved;
+    }
+
+    public void setModifiersRemoved(int modifiersRemoved) {
+        this.modifiersRemoved = modifiersRemoved;
+    }
+
+    public void addModifiersRemoved(int added) {
+        modifiersRemoved += added;
     }
 
     //Portals that have different Active States will be considered equal
