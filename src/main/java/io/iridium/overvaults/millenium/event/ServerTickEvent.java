@@ -1,6 +1,5 @@
 package io.iridium.overvaults.millenium.event;
 
-import fr.denisd3d.mc2discord.core.Mc2Discord;
 import fr.denisd3d.mc2discord.core.MessageManager;
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.ServerConfig;
@@ -34,8 +33,6 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static fr.denisd3d.mc2discord.shadow.org.json.XMLTokener.entity;
 
 public class ServerTickEvent {
     private static final Random random = new Random();
