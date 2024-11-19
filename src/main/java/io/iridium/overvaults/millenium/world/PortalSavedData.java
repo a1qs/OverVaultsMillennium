@@ -63,7 +63,9 @@ public class PortalSavedData extends SavedData {
             ResourceKey<Level> dimension = ResourceKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(portalTag.getString("Dimension")));
             boolean activeState = portalTag.getBoolean("ActiveState");
 
-            data.addPortalData(new PortalData(rotation, portalFrameCenterPos, size, dimension, activeState));
+            int modifiersRemoved = activeState ? portalTag.getInt("ModifiersRemoved") : -1;
+
+            data.addPortalData(new PortalData(rotation, portalFrameCenterPos, size, dimension, activeState, modifiersRemoved));
         }
         return data;
     }
@@ -79,6 +81,9 @@ public class PortalSavedData extends SavedData {
             portalTag.putString("Size", data.getSize().name());
             portalTag.putString("Dimension", data.getDimension().location().toString());
             portalTag.putBoolean("ActiveState", data.getActiveState());
+
+            if (data.getActiveState()) portalTag.putInt("ModifiersRemoved", data.getModifiersRemoved());
+
 
             listTag.add(portalTag);
         }
