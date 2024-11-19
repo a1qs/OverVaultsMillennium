@@ -14,7 +14,7 @@ public class ServerConfig {
     public static final ForgeConfigSpec.ConfigValue<Boolean> BROADCAST_IN_CHAT;
     public static final ForgeConfigSpec.ConfigValue<Boolean> PLAY_SOUND_ON_OPEN;
     public static final ForgeConfigSpec.ConfigValue<Boolean> UPDATE_VAULT_COMPASS;
-
+    public static final ForgeConfigSpec.ConfigValue<Boolean> SPAWN_ENTITY_MODIFIER_REMOVAL;
 
     public static final ForgeConfigSpec.ConfigValue<Integer> MIN_SECONDS_UNTIL_PORTAL_SPAWN;
     public static final ForgeConfigSpec.ConfigValue<Integer> MIN_SECONDS_UNTIL_MODIFIER_REMOVAL;
@@ -24,13 +24,16 @@ public class ServerConfig {
     public static final ForgeConfigSpec.ConfigValue<Integer> RAW_VAULT_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> NORMAL_VAULT_WEIGHT;
     public static final ForgeConfigSpec.ConfigValue<Integer> UBER_VAULT_WEIGHT;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> NORMAL_VAULT_MODIFIERS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> UBER_VAULT_MODIFIERS;
-
+    public static final ForgeConfigSpec.ConfigValue<Integer> ENTITY_STEP;
     public static final ForgeConfigSpec.ConfigValue<Double> CHANCE_OF_SPECIAL_THEME_NETHER;
     public static final ForgeConfigSpec.ConfigValue<Double> CHANCE_OF_SPECIAL_THEME_END;
+
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> NORMAL_VAULT_MODIFIERS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> UBER_VAULT_MODIFIERS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> NETHER_VAULT_THEMES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> VOID_VAULT_THEMES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> BOSS_ENTITIES;
+
 
 
 
@@ -53,6 +56,9 @@ public class ServerConfig {
 
         UPDATE_VAULT_COMPASS = BUILDER.comment("Whether the Vault Compass should be updated upon switching Dimensions/an OverVault opening")
                 .define("UPDATE_VAULT_COMPASS", true);
+
+        SPAWN_ENTITY_MODIFIER_REMOVAL = BUILDER.comment("Whether an entity should be spawned upon removing a Modifier from an Overvault")
+                .define("SPAWN_ENTITY_MODIFIER_REMOVAL", true);
 
         BUILDER.pop();
 
@@ -91,9 +97,12 @@ public class ServerConfig {
         CHANCE_OF_SPECIAL_THEME_END = BUILDER.comment("The chance of getting a special theme defined in 'VOID_VAULT_THEMES' as a decimal.")
                 .defineInRange("CHANCE_OF_SPECIAL_THEME_END", 0.10, 0.0, 1.0);
 
+        ENTITY_STEP = BUILDER.comment("The value chosen to 'tier-up' a spawned Entity from an active Vault Portal\nAfter 4 tier-ups, a Boss-Entity is spawned and it starts over")
+                        .defineInRange("ENTITY_STEP", 5, 1, Integer.MAX_VALUE);
+
         BUILDER.pop();
 
-        // Weight/Chances Settings
+        // List Settings
         BUILDER.push("List Settings");
 
         NORMAL_VAULT_MODIFIERS = BUILDER
@@ -126,6 +135,14 @@ public class ServerConfig {
                                 "the_vault:classic_vault_void",
                                 "the_vault:classic_vault_end_void",
                                 "the_vault:classic_vault_factory_void"
+                        ), obj -> obj instanceof String);
+
+        BOSS_ENTITIES = BUILDER
+                .comment("List of entity Ids that can be selected as a Boss monster when summoning a Vault enemy after modifier removal")
+                .defineList("BOSS_ENTITIES",
+                        Arrays.asList(
+                                "the_vault:robot",
+                                "the_vault:boogieman"
                         ), obj -> obj instanceof String);
 
         BUILDER.pop();
