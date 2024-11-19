@@ -29,6 +29,7 @@ In this version of OverVaults, forked from [OverVaults](https://github.com/Iridi
     * All OverVault Portals may either be a Raw Vault, or a Normal Vault with special modifiers
     * Each OverVault Portal can have various modifiers assigned to it.
     * Each `x` seconds (can be a range) it may remove a random modifier assigned to that OverVault Portal (Shrinks 1 modifier stack, e.g. 10x Energizing -> 9x Energizing)
+    * Once removed, it will spawn a Vault Dweller (or boss if enough have spawned, configurable), which gradually improve their stats with the higher tier they go
     * There may only be one active portal at a time. (does not affect the activateAllPortals command)
     * A message gets sent to each player except for players currently inside a Vault, noting the approx. position of the Portal (last 2 digits obfuscated)
     * Players with a Vault Compass will have their compasses pointing towards the Portal if they are in the same dimension
@@ -45,6 +46,8 @@ In this version of OverVaults, forked from [OverVaults](https://github.com/Iridi
 - Added new commands
     - `/overvaults structures activateAllPortals` 
         - Activates all the valid structures in the world, this command is only meant for debug purposes and may mess things up if used on an active server
+    - `/overvaults structures activateStructureWithIndex`
+      - Activates a structure in the world with the specified index
     - `/overvaults structures activateRandomPortal`
         - Activates a random Overvault portal the same it would as the random tick counter.
     - `/overvaults structures deactivateActivePortal`
@@ -59,10 +62,10 @@ In this version of OverVaults, forked from [OverVaults](https://github.com/Iridi
         - Returns a random structure that is considered valid in any dimension.
     - `/overvaults structures getStructureList {ResourceLocation: dimension}`
         - Lists all the valid structures coordinates found in the given dimension alongside its Index & a command to teleport to it.
-    - `/overvaults structures getStructureWithIndex {ResourceLocation: dimension} {Integer: index}`
-        - Returns the Structure that matches the given Dimension & index.
-    - `/overvaults structures removeStructureWithIndex {ResourceLocation: dimension} {Integer: index}`
-        - Removes the Structure that matches the given Dimension & index.
+    - `/overvaults structures getStructureWithIndex {Integer: index}`
+        - Returns the Structure that matches the given index.
+    - `/overvaults structures removeStructureWithIndex {Integer: index}`
+        - Removes the Structure that matches the given index.
     - `/overvaults lootTables addLootTableEntry {ResourceLocation: LootTable} {Integer: WeightPool} {String: NewItemId} {Integer: NewItemWeight} {Integer: NewItemMinRoll} {Integer: NewItemMaxRoll}`
         - Adds a Loot table entry with the given parameters to the LootTable, may not function with every Loottable due to how they differ inbetween eachother.
     - `/overvaults lootTables removeItemFromLootTable {ResourceLocation: LootTable} {String: RemovalItemId}`
