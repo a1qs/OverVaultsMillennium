@@ -25,15 +25,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.OptionalInt;
 import java.util.Random;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class StructureCommands extends BaseCommand {
     public String getName() {
@@ -41,8 +36,9 @@ public class StructureCommands extends BaseCommand {
     }
 
     public void build(LiteralArgumentBuilder<CommandSourceStack> builder) {
-        builder.then(Commands.literal("removeStructureWithIndex").then(Commands.argument("dimension", DimensionArgument.dimension()).then(Commands.argument("index", IntegerArgumentType.integer()).executes(this::removeStructureWithIndex))));
-        builder.then(Commands.literal("getStructureWithIndex").then(Commands.argument("dimension", DimensionArgument.dimension()).then(Commands.argument("index", IntegerArgumentType.integer()).executes(this::getStructureWithIndex))));
+        builder.then(Commands.literal("activateStructureWithIndex").then(Commands.argument("index", IntegerArgumentType.integer()).executes(this::activateStructureWithIndex)));
+        builder.then(Commands.literal("removeStructureWithIndex").then(Commands.argument("index", IntegerArgumentType.integer()).executes(this::removeStructureWithIndex)));
+        builder.then(Commands.literal("getStructureWithIndex").then(Commands.argument("index", IntegerArgumentType.integer()).executes(this::getStructureWithIndex)));
         builder.then(Commands.literal("getStructureList").then(Commands.argument("dimension", DimensionArgument.dimension()).executes(this::getStructureList)));
         builder.then(Commands.literal("getClosestStructure").executes(this::getClosestStructure));
         builder.then(Commands.literal("getRandomStructure").executes(this::getRandomStructure));
@@ -50,7 +46,6 @@ public class StructureCommands extends BaseCommand {
         builder.then(Commands.literal("getNextOverVaultSpawn").executes(this::getNextOverVaultSpawn));
         builder.then(Commands.literal("activateAllPortals").executes(this::activateAllPortals));
         builder.then(Commands.literal("activateRandomPortal").executes(this::activateRandomPortal));
-        builder.then(Commands.literal("activateStructureWithIndex").executes(this::activateStructureWithIndex));
         builder.then(Commands.literal("deactivateActivePortal").executes(this::deactivateActivePortal));
     }
 
@@ -61,16 +56,19 @@ public class StructureCommands extends BaseCommand {
                 .append(new TextComponent(" Portal Data List ").withStyle(ChatFormatting.AQUA))
                 .append(new TextComponent("==="));
 
-        int count = 0;
-        for(PortalData data : PortalUtil.filteredPortalList(level)) {
-            cmp.append("\n");
+        List<PortalData> originalList = PortalSavedData.get(level).getPortalData(); // Get the merged list
 
-            BlockPos offsetPosition =  data.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
-            String tpCommand = "/execute as @s in " + data.getDimension().location() + " run tp " + offsetPosition.getX() + " " + offsetPosition.getY() + " " + offsetPosition.getZ();
+        int count = 0;
+        for(PortalData filteredData : PortalUtil.filteredPortalList(level)) {
+            cmp.append("\n");
+            int index = originalList.indexOf(filteredData);
+
+            BlockPos offsetPosition =  filteredData.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
+            String tpCommand = "/execute as @s in " + filteredData.getDimension().location() + " run tp " + offsetPosition.getX() + " " + offsetPosition.getY() + " " + offsetPosition.getZ();
             MutableComponent tpComponent = new TextComponent(" [Teleport!]").withStyle(ChatFormatting.AQUA);
             tpComponent.withStyle((style) -> style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent("tpCommand"))).withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, tpCommand)));
-            cmp.append(new TextComponent("Index " + count + ". ").withStyle(ChatFormatting.YELLOW));
-            cmp.append(new TextComponent("X: " + data.getPortalFrameCenterPos().getX() + " Y: " + data.getPortalFrameCenterPos().getY() + " Z: " + data.getPortalFrameCenterPos().getZ()));
+            cmp.append(new TextComponent("Index " + index + ". ").withStyle(ChatFormatting.YELLOW));
+            cmp.append(new TextComponent("X: " + filteredData.getPortalFrameCenterPos().getX() + " Y: " + filteredData.getPortalFrameCenterPos().getY() + " Z: " + filteredData.getPortalFrameCenterPos().getZ()));
             cmp.append(tpComponent);
             count++;
         }
@@ -124,26 +122,24 @@ public class StructureCommands extends BaseCommand {
         return 0;
     }
 
-    private int getStructureWithIndex(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        ServerLevel level = DimensionArgument.getDimension(context, "dimension");
+    private int getStructureWithIndex(CommandContext<CommandSourceStack> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        List<PortalData> portalDataList = PortalUtil.filteredPortalList(level);
+        List<PortalData> portalDataList = PortalSavedData.getServer().getPortalData();
 
         if (index >= portalDataList.size()) {
             context.getSource().sendFailure(new TextComponent("Index: " + index + " is out of bounds! Max allowed value is: " + (portalDataList.size() - 1)));
             return 1;
         }
 
-        PortalData data = PortalSavedData.get(level).getPortalData().get(index);
+        PortalData data = PortalSavedData.getServer().getPortalData().get(index);
         context.getSource().sendSuccess(TextUtil.getPortalTpComponent(index, data), true);
         return 0;
     }
 
-    private int removeStructureWithIndex(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        ServerLevel level = DimensionArgument.getDimension(context, "dimension");
+    private int removeStructureWithIndex(CommandContext<CommandSourceStack> context) {
         int index = IntegerArgumentType.getInteger(context, "index");
-        PortalSavedData portalSavedData = PortalSavedData.get(level);
-        List<PortalData> portalDataList = PortalUtil.filteredPortalList(level);
+        PortalSavedData portalSavedData = PortalSavedData.getServer();
+        List<PortalData> portalDataList = portalSavedData.getPortalData();
 
         if (index >= portalDataList.size()) {
             context.getSource().sendFailure(new TextComponent("Index: " + index + " is out of bounds! Max allowed value is: " + (portalDataList.size() - 1)));
@@ -152,7 +148,7 @@ public class StructureCommands extends BaseCommand {
 
 
         PortalData portalToRemove = portalDataList.get(index);
-        portalSavedData.getPortalData().remove(portalToRemove);
+        portalDataList.remove(portalToRemove);
 
         MutableComponent cmp = new TextComponent("Removed Portal with index: " + index + "\n")
                 .append(new TextComponent("(Note: This portal will be re-added to the List when the chunks are re-loaded)").withStyle(ChatFormatting.GRAY));
@@ -225,32 +221,22 @@ public class StructureCommands extends BaseCommand {
 
     private int activateAllPortals(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         MinecraftServer server = context.getSource().getServer();
+        BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(server);
+        PortalSavedData portalSavedData = PortalSavedData.get(server);
 
-        List<ServerLevel> validDimensions = Stream.of(
-                server.getLevel(Level.OVERWORLD),
-                server.getLevel(Level.NETHER),
-                server.getLevel(Level.END)
-        ).filter(Objects::nonNull).toList();
+        for(PortalData data : portalSavedData.getPortalData()) {
+            List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(server.getLevel(data.getDimension()), data);
 
-
-        for(ServerLevel level : validDimensions) {
-            PortalSavedData portalSavedData = PortalSavedData.get(level);
-            for(PortalData data : portalSavedData.getPortalData()) {
-
-                List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(level, data);
-
-
-                BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
-                for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
-                    entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
-                }
-                entityChunkData.setDirty();
-
-                data.setActiveState(true);
-                portalSavedData.setDirty();
-                context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(data, false), ChatType.SYSTEM, Util.NIL_UUID);
+            for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
+                entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
             }
+
+            data.setActiveState(true);
+            entityChunkData.setDirty();
+            portalSavedData.setDirty();
+            context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(data, false), ChatType.SYSTEM, Util.NIL_UUID);
         }
+
         return 0;
     }
 
@@ -266,12 +252,24 @@ public class StructureCommands extends BaseCommand {
     }
 
     private int activateStructureWithIndex(CommandContext<CommandSourceStack> context) {
-        if(PortalSavedData.get(ServerLifecycleHooks.getCurrentServer()).getFirstActivePortalData() != null) {
+        int index = IntegerArgumentType.getInteger(context, "index");
+        PortalSavedData portalSavedData = PortalSavedData.getServer();
+        if(portalSavedData.getFirstActivePortalData() != null) {
             context.getSource().sendFailure(new TextComponent("An OverVaults portal is already active!"));
             return 1;
         }
 
-        //TODO:
+        List<PortalData> portalDataList = portalSavedData.getPortalData();
+
+        if (index >= portalDataList.size()) {
+            context.getSource().sendFailure(new TextComponent("Index: " + index + " is out of bounds! Max allowed value is: " + (portalDataList.size() - 1)));
+            return 1;
+        }
+
+
+        PortalData portalToOpen = portalDataList.get(index);
+        PortalUtil.activatePortal(ServerLifecycleHooks.getCurrentServer(), portalToOpen);
+        context.getSource().sendSuccess(new TextComponent("Activated Portal with index: " + index).withStyle(ChatFormatting.YELLOW), true);
         return 0;
     }
 }

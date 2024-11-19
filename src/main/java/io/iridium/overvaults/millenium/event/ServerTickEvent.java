@@ -2,13 +2,10 @@ package io.iridium.overvaults.millenium.event;
 
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.ServerConfig;
-import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
-import io.iridium.overvaults.millenium.util.TextUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
-import iskallia.vault.block.VaultArtisanStationBlock;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.init.ModBlocks;
@@ -16,8 +13,6 @@ import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -66,28 +61,7 @@ public class ServerTickEvent {
                     return;
                 }
 
-                server.getPlayerList().getPlayers().forEach(player -> {
-                    if (ServerConfig.PLAY_SOUND_ON_OPEN.get())
-                        player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
-                });
-
-                if (ServerConfig.BROADCAST_IN_CHAT.get()) {
-                    MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
-                }
-
-                List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(portalLevel, data);
-
-                BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
-                for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
-                    entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
-                }
-                entityChunkData.setDirty();
-
-                data.setActiveState(true);
-                if (ServerConfig.UPDATE_VAULT_COMPASS.get())
-                    MiscUtil.sendCompassInfo(portalLevel, data.getPortalFrameCenterPos());
-                portalSavedData.setDirty();
-
+                PortalUtil.activatePortal(server, data);
                 actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
                 counter = 0;
             }
@@ -260,4 +234,6 @@ public class ServerTickEvent {
         int maxRemoveModifierTimer = ServerConfig.MAX_SECONDS_UNTIL_MODIFIER_REMOVAL.get() * 20;
         return random.nextInt(maxRemoveModifierTimer - minRemoveModifierTimer + 1) + minRemoveModifierTimer;
     }
+
+
 }

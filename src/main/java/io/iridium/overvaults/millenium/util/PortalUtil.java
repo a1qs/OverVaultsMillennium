@@ -1,6 +1,7 @@
 package io.iridium.overvaults.millenium.util;
 
 import com.mojang.datafixers.util.Pair;
+import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
@@ -8,9 +9,12 @@ import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.init.ModBlocks;
 import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -30,7 +34,7 @@ public class PortalUtil {
      * @param data The Portal data which we would like to activate, used to determine size, position & rotation of the Portal
      * @return A List of Vault Portal tile entities that have been filled
      */
-    public static List<VaultPortalTileEntity> activatePortal(ServerLevel level, PortalData data) {
+    public static List<VaultPortalTileEntity> portalTileActivation(ServerLevel level, PortalData data) {
         List<VaultPortalTileEntity> vaultPortalTileEntities = new ArrayList<>();
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
         Iterable<BlockPos> blocksToFill = data.getSize().getBlockPositions(data.getPortalFrameCenterPos(), data.getRotation());
@@ -98,5 +102,38 @@ public class PortalUtil {
                 .stream()
                 .filter(p -> p.getDimension().equals(level.dimension()))
                 .toList();
+    }
+
+    private static void notifyPlayers(MinecraftServer server, PortalData data) {
+        server.getPlayerList().getPlayers().forEach(player -> {
+            if (ServerConfig.PLAY_SOUND_ON_OPEN.get())
+                player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
+        });
+
+        if (ServerConfig.BROADCAST_IN_CHAT.get()) {
+            MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
+
+            if (ServerConfig.UPDATE_VAULT_COMPASS.get())
+                MiscUtil.sendCompassInfo(server.getLevel(data.getDimension()), data.getPortalFrameCenterPos());
+        }
+    }
+
+    public static void activatePortal(MinecraftServer server, PortalData data) {
+        ServerLevel portalLevel = server.getLevel(data.getDimension());
+        if(portalLevel == null) {
+            return;
+        }
+        BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.getServer();
+        PortalSavedData portalSavedData = PortalSavedData.getServer();
+        List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(portalLevel, data);
+
+        for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
+            entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
+        }
+        data.setActiveState(true);
+        entityChunkData.setDirty();
+        portalSavedData.setDirty();
+
+        notifyPlayers(server, data);
     }
 }
