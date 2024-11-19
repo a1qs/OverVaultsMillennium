@@ -7,10 +7,12 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +93,16 @@ public class PortalSavedData extends SavedData {
         return nbt;
     }
 
-    public static PortalSavedData get(ServerLevel world) {
-        return world.getDataStorage().computeIfAbsent(PortalSavedData::load, PortalSavedData::new, DATA_NAME);
+    // Data-getters
+    public static PortalSavedData getServer() {
+        return get(ServerLifecycleHooks.getCurrentServer());
+    }
+
+    public static PortalSavedData get(ServerLevel level) {
+        return get(level.getServer());
+    }
+
+    public static PortalSavedData get(MinecraftServer srv) {
+        return srv.overworld().getDataStorage().computeIfAbsent(PortalSavedData::load, PortalSavedData::new, DATA_NAME);
     }
 }

@@ -4,9 +4,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -96,7 +98,16 @@ public class BlockEntityChunkSavedData extends SavedData {
 
 
 
+    // Data-getters
+    public static BlockEntityChunkSavedData getServer() {
+        return get(ServerLifecycleHooks.getCurrentServer());
+    }
+
     public static BlockEntityChunkSavedData get(ServerLevel level) {
-        return level.getDataStorage().computeIfAbsent(BlockEntityChunkSavedData::load, BlockEntityChunkSavedData::new, DATA_NAME);
+        return get(level.getServer());
+    }
+
+    public static BlockEntityChunkSavedData get(MinecraftServer srv) {
+        return srv.overworld().getDataStorage().computeIfAbsent(BlockEntityChunkSavedData::load, BlockEntityChunkSavedData::new, DATA_NAME);
     }
 }

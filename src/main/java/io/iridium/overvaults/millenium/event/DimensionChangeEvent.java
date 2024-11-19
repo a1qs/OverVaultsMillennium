@@ -5,6 +5,7 @@ import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.world.PortalData;
+import io.iridium.overvaults.millenium.world.PortalSavedData;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -20,7 +21,7 @@ public class DimensionChangeEvent {
         if (!ServerConfig.UPDATE_VAULT_COMPASS.get()) return;
 
         if (event.getPlayer().getLevel() instanceof ServerLevel level) {
-            PortalData data = PortalUtil.getAllLevelActivePortalData(ServerLifecycleHooks.getCurrentServer());
+            PortalData data = PortalSavedData.getServer().getFirstActivePortalData();
             if (data == null) return;
             if (data.getDimension() == event.getTo()) {
                 MiscUtil.sendCompassInfo(level, data.getPortalFrameCenterPos());

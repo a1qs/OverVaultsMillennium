@@ -50,19 +50,19 @@ public class StructureCommands extends BaseCommand {
         builder.then(Commands.literal("getNextOverVaultSpawn").executes(this::getNextOverVaultSpawn));
         builder.then(Commands.literal("activateAllPortals").executes(this::activateAllPortals));
         builder.then(Commands.literal("activateRandomPortal").executes(this::activateRandomPortal));
+        builder.then(Commands.literal("activateStructureWithIndex").executes(this::activateStructureWithIndex));
         builder.then(Commands.literal("deactivateActivePortal").executes(this::deactivateActivePortal));
     }
 
     private int getStructureList(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerLevel level = DimensionArgument.getDimension(context, "dimension");
-        PortalSavedData savedData = PortalSavedData.get(level);
 
         MutableComponent cmp = new TextComponent("===")
                 .append(new TextComponent(" Portal Data List ").withStyle(ChatFormatting.AQUA))
                 .append(new TextComponent("==="));
 
         int count = 0;
-        for(PortalData data : savedData.getPortalData()) {
+        for(PortalData data : PortalUtil.filteredPortalList(level)) {
             cmp.append("\n");
 
             BlockPos offsetPosition =  data.getPortalFrameCenterPos().offset(3.0, 0.0, 3.0);
@@ -89,7 +89,7 @@ public class StructureCommands extends BaseCommand {
     private int getNextOverVaultSpawn(CommandContext<CommandSourceStack> context) {
         CommandSourceStack source = context.getSource();
 
-        if(PortalUtil.getAllLevelActivePortalData(ServerLifecycleHooks.getCurrentServer()) != null) {
+        if(PortalSavedData.get(context.getSource().getServer()).getFirstActivePortalData() != null) {
             source.sendFailure(new TextComponent("An OverVaults portal is already active! Cannot spawn additional."));
             return 1;
         }
@@ -113,32 +113,21 @@ public class StructureCommands extends BaseCommand {
     }
 
     private int getActiveOverVault(CommandContext<CommandSourceStack> context) {
-        List<PortalData> unifiedPortalDataList = PortalUtil.getAllLevelPortalData(context.getSource().getServer());
-        if(unifiedPortalDataList == null) {
-            context.getSource().sendFailure(new TextComponent("No valid portal data found across all dimensions!"));
-            return 1;
-        }
-
-        OptionalInt indexOpt = IntStream.range(0, unifiedPortalDataList.size())
-                .filter(i -> unifiedPortalDataList.get(i).getActiveState())
-                .findFirst();
-
-        PortalData data = indexOpt.isPresent() ? unifiedPortalDataList.get(indexOpt.getAsInt()) : null;
-        int index = indexOpt.orElse(-1);
+        PortalData data = PortalSavedData.get(context.getSource().getServer()).getFirstActivePortalData();
 
         if(data == null) {
             context.getSource().sendFailure(new TextComponent("No active OverVault found!"));
             return 1;
         }
 
-        context.getSource().sendSuccess(TextUtil.getPortalTpComponent(index, data), true);
+        context.getSource().sendSuccess(TextUtil.getPortalTpComponent(PortalSavedData.get(context.getSource().getServer()).getPortalData().indexOf(data), data), true);
         return 0;
     }
 
     private int getStructureWithIndex(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerLevel level = DimensionArgument.getDimension(context, "dimension");
         int index = IntegerArgumentType.getInteger(context, "index");
-        List<PortalData> portalDataList = PortalSavedData.get(level).getPortalData();
+        List<PortalData> portalDataList = PortalUtil.filteredPortalList(level);
 
         if (index >= portalDataList.size()) {
             context.getSource().sendFailure(new TextComponent("Index: " + index + " is out of bounds! Max allowed value is: " + (portalDataList.size() - 1)));
@@ -153,14 +142,18 @@ public class StructureCommands extends BaseCommand {
     private int removeStructureWithIndex(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerLevel level = DimensionArgument.getDimension(context, "dimension");
         int index = IntegerArgumentType.getInteger(context, "index");
-        List<PortalData> portalDataList = PortalSavedData.get(level).getPortalData();
+        PortalSavedData portalSavedData = PortalSavedData.get(level);
+        List<PortalData> portalDataList = PortalUtil.filteredPortalList(level);
 
         if (index >= portalDataList.size()) {
             context.getSource().sendFailure(new TextComponent("Index: " + index + " is out of bounds! Max allowed value is: " + (portalDataList.size() - 1)));
             return 1;
         }
 
-        portalDataList.remove(index);
+
+        PortalData portalToRemove = portalDataList.get(index);
+        portalSavedData.getPortalData().remove(portalToRemove);
+
         MutableComponent cmp = new TextComponent("Removed Portal with index: " + index + "\n")
                 .append(new TextComponent("(Note: This portal will be re-added to the List when the chunks are re-loaded)").withStyle(ChatFormatting.GRAY));
 
@@ -187,9 +180,8 @@ public class StructureCommands extends BaseCommand {
         return 0;
     }
 
-    public int deactivateActivePortal(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        ServerPlayer player = context.getSource().getPlayerOrException();
-        PortalData data = PortalUtil.getAllLevelActivePortalData(context.getSource().getServer());
+    public int deactivateActivePortal(CommandContext<CommandSourceStack> context) {
+        PortalData data = PortalSavedData.get(context.getSource().getServer()).getFirstActivePortalData();
         MinecraftServer srv = context.getSource().getServer();
 
         if (data == null) {
@@ -217,21 +209,16 @@ public class StructureCommands extends BaseCommand {
         entityChunkData.removeChunkPositionData();
 
 
-        context.getSource().sendSuccess(new TextComponent("Removed data, did not remove tile entities (lazy) "), true);
+        //TODO:
+        context.getSource().sendSuccess(new TextComponent("Removed data, did not remove tile-entities. (TBD)"), true);
         return 0;
     }
 
     private int getRandomStructure(CommandContext<CommandSourceStack> context) {
-        MinecraftServer server = context.getSource().getServer();
+        List<PortalData> portalDataList = PortalSavedData.get(context.getSource().getServer()).getPortalData();
 
-        List<PortalData> unifiedPortalDataList = PortalUtil.getAllLevelPortalData(server);
-        if(unifiedPortalDataList == null) {
-            context.getSource().sendFailure(new TextComponent("No valid portal data found across all dimensions!"));
-            return 1;
-        }
-
-        int index = new Random().nextInt(unifiedPortalDataList.size());
-        PortalData data = unifiedPortalDataList.get(index);
+        int index = new Random().nextInt(portalDataList.size());
+        PortalData data = portalDataList.get(index);
         context.getSource().sendSuccess(TextUtil.getPortalTpComponent(index, data), true);
         return 0;
     }
@@ -268,13 +255,23 @@ public class StructureCommands extends BaseCommand {
     }
 
     private int activateRandomPortal(CommandContext<CommandSourceStack> context) {
-        if(PortalUtil.getAllLevelActivePortalData(ServerLifecycleHooks.getCurrentServer()) != null) {
+        if(PortalSavedData.get(ServerLifecycleHooks.getCurrentServer()).getFirstActivePortalData() != null) {
             context.getSource().sendFailure(new TextComponent("An OverVaults portal is already active! Cannot set activation timer."));
             return 1;
         }
 
         context.getSource().sendSuccess(new TextComponent("Instantly activated a Portal!").withStyle(ChatFormatting.YELLOW), true);
         ServerTickEvent.counter = ServerTickEvent.actlTicksForPortalSpawn;
+        return 0;
+    }
+
+    private int activateStructureWithIndex(CommandContext<CommandSourceStack> context) {
+        if(PortalSavedData.get(ServerLifecycleHooks.getCurrentServer()).getFirstActivePortalData() != null) {
+            context.getSource().sendFailure(new TextComponent("An OverVaults portal is already active!"));
+            return 1;
+        }
+
+        //TODO:
         return 0;
     }
 }

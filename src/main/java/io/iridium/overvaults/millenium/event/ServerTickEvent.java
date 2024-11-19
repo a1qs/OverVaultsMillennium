@@ -8,6 +8,7 @@ import io.iridium.overvaults.millenium.util.TextUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
+import iskallia.vault.block.VaultArtisanStationBlock;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.init.ModBlocks;
@@ -45,189 +46,165 @@ public class ServerTickEvent {
 
         MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
         if (server == null) return;
+        ServerLevel level = server.getLevel(Level.OVERWORLD);
+        if(level == null) return;
 
-        List<ServerLevel> dimensions = Arrays.asList(
-                server.getLevel(Level.OVERWORLD),
-                server.getLevel(Level.NETHER),
-                server.getLevel(Level.END)
-        );
-
-        List<ServerLevel> validDimensions = new ArrayList<>(dimensions.stream()
-                .filter(Objects::nonNull)
-                .toList());
 
         if(actlTicksForPortalSpawn == -1) actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
 
         // Check if the counter has reached the limit for portal spawning
         if (shouldSpawnPortal(actlTicksForPortalSpawn)) {
-            if (!validDimensions.isEmpty()) {
-                boolean foundPortal = false;
+            PortalSavedData portalSavedData = PortalSavedData.get(level);
+            List<PortalData> portalDataList = portalSavedData.getPortalData();
 
-                // Try each dimension until a valid portal is found
-                // Shuffle the list
-                Collections.shuffle(validDimensions);
-
-                for (ServerLevel level : validDimensions) {
-                    PortalSavedData portalSavedData = PortalSavedData.get(level);
-                    List<PortalData> portalDataList = portalSavedData.getPortalData();
-
-                    if (portalDataList != null && !portalDataList.isEmpty()) {
-                        foundPortal = true;
-
-                        PortalData data = PortalUtil.getRandomPortalData(portalDataList);
-
-                        server.getPlayerList().getPlayers().forEach(player -> {
-                            if(ServerConfig.PLAY_SOUND_ON_OPEN.get()) player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
-                        });
-
-                        if(ServerConfig.BROADCAST_IN_CHAT.get()) {
-                            MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
-                        }
-
-                        List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(level, data);
-
-                        BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
-                        for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
-                            entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
-                        }
-                        entityChunkData.setDirty();
-
-                        data.setActiveState(true);
-                        if(ServerConfig.UPDATE_VAULT_COMPASS.get()) MiscUtil.sendCompassInfo(level, data.getPortalFrameCenterPos());
-                        portalSavedData.setDirty();
-
-                        actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
-                        counter = 0;
-                        break;
-                    }
-                }
-
-                if (!foundPortal) {
-                    OverVaults.LOGGER.warn("Could not find a valid OverVaults structure to open a Vault Portal in any dimension.");
+            if (portalDataList != null && !portalDataList.isEmpty()) {
+                PortalData data = PortalUtil.getRandomPortalData(portalDataList);
+                ServerLevel portalLevel = server.getLevel(data.getDimension());
+                if(portalLevel == null) {
+                    OverVaults.LOGGER.error("Level {} equals null. Please report this.", data.getDimension());
                     counter = 0;
+                    return;
                 }
 
-            } else {
-                OverVaults.LOGGER.warn("No valid dimensions found for spawning a portal.");
+                server.getPlayerList().getPlayers().forEach(player -> {
+                    if (ServerConfig.PLAY_SOUND_ON_OPEN.get())
+                        player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
+                });
+
+                if (ServerConfig.BROADCAST_IN_CHAT.get()) {
+                    MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
+                }
+
+                List<VaultPortalTileEntity> portalTileEntities = PortalUtil.activatePortal(portalLevel, data);
+
+                BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
+                for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
+                    entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
+                }
+                entityChunkData.setDirty();
+
+                data.setActiveState(true);
+                if (ServerConfig.UPDATE_VAULT_COMPASS.get())
+                    MiscUtil.sendCompassInfo(portalLevel, data.getPortalFrameCenterPos());
+                portalSavedData.setDirty();
+
+                actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
                 counter = 0;
             }
         }
 
+
         // Increment the counter only if there's no active portal across all dimensions
-        if (validDimensions.stream().noneMatch(level -> PortalSavedData.get(level).hasActiveOverVault()) && counter < Integer.MAX_VALUE) {
+        if (PortalSavedData.get(level).hasActiveOverVault() && counter < Integer.MAX_VALUE) {
             counter++;
         }
 
-        validDimensions.forEach(level -> {
-            PortalSavedData portalSavedData = PortalSavedData.get(level);
-            if (portalSavedData.hasActiveOverVault()) {
-                activePortalTickCounter++;
 
-                if(actlRemoveModifierTimer == -1) actlRemoveModifierTimer = getRandomRemoveModifierTimer();
-                if (shouldModifyPortal(actlRemoveModifierTimer)) {
-                    boolean hasModified = false;
-                    BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
-                    List<BlockPos> portalTilePositions = entityChunkData.getPortalTilePositions();
+        PortalSavedData portalSavedData = PortalSavedData.get(level);
+        if (portalSavedData.hasActiveOverVault()) {
+            activePortalTickCounter++;
 
-                    Random random = new Random();
-                    AtomicInteger randInt = new AtomicInteger(-1);
+            if(actlRemoveModifierTimer == -1) actlRemoveModifierTimer = getRandomRemoveModifierTimer();
+            if (shouldModifyPortal(actlRemoveModifierTimer)) {
+                PortalData portalData = portalSavedData.getFirstActivePortalData();
+                ServerLevel portalLevel = server.getLevel(portalData.getDimension());
+                BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
+                List<BlockPos> portalTilePositions = entityChunkData.getPortalTilePositions();
+                boolean hasModified = false;
 
-                    // Pre-select a random modifier stack index for the first portal
-                    if (!portalTilePositions.isEmpty()) {
-                        BlockPos firstPos = portalTilePositions.get(0);
-                        VaultPortalTileEntity firstPortalTileEntity = (VaultPortalTileEntity) level.getBlockEntity(firstPos);
+                Random random = new Random();
+                AtomicInteger randInt = new AtomicInteger(-1);
 
-                        if (firstPortalTileEntity != null && firstPortalTileEntity.getData().isPresent()) {
-                            List<VaultModifierStack> modifierList = firstPortalTileEntity.getData().get().getModifiers().getList();
-                            if (!modifierList.isEmpty()) {
-                                randInt.set(random.nextInt(modifierList.size()));
-                                hasModified = true;
-                                if(portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
-                                    portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
-                                } else {
-                                    portalSavedData.getFirstActivePortalData().addModifiersRemoved(1);
-                                }
-                            }
-                        }
-                    }
+                // Pre-select a random modifier stack index for the first portal
+                if (!portalTilePositions.isEmpty()) {
+                    BlockPos firstPos = portalTilePositions.get(0);
+                    VaultPortalTileEntity firstPortalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(firstPos);
 
-                    // Get the iterator for the portalTilePositions list
-                    Iterator<BlockPos> iterator = portalTilePositions.iterator();
-
-                    while (iterator.hasNext()) {
-                        BlockPos pos = iterator.next();
-
-                        if (level.isLoaded(pos)) {  // Only process if chunk is loaded
-                            BlockState blockState = level.getBlockState(pos);
-
-                            // Check if the block is still a portal block before accessing the tile entity
-                            if (blockState.is(ModBlocks.VAULT_PORTAL)) {
-                                VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) level.getBlockEntity(pos);
-                                if (portalTileEntity != null && portalTileEntity.getData().isPresent()) {
-                                    portalTileEntity.getData().ifPresent(data -> handleModifierRemoval(data, randInt));
-                                }
+                    if (firstPortalTileEntity != null && firstPortalTileEntity.getData().isPresent()) {
+                        List<VaultModifierStack> modifierList = firstPortalTileEntity.getData().get().getModifiers().getList();
+                        if (!modifierList.isEmpty()) {
+                            randInt.set(random.nextInt(modifierList.size()));
+                            hasModified = true;
+                            if(portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
+                                portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
                             } else {
-                                OverVaults.LOGGER.warn("Activated portal was invalidated. Correcting.");
-                                // Remove the portal tile entity from the data and the chunk position
-                                iterator.remove();  // Use the iterator to safely remove the current element
-                                entityChunkData.removePortalTileEntityData();
-                                entityChunkData.removeChunkPositionData();
-
-                                // Check for active portal data and update accordingly
-                                if (PortalUtil.getAllLevelActivePortalData(server) != null) {
-                                    Objects.requireNonNull(PortalUtil.getAllLevelActivePortalData(server)).setActiveState(false);
-                                    portalSavedData.setDirty();
-                                }
+                                portalSavedData.getFirstActivePortalData().addModifiersRemoved(1);
                             }
                         }
                     }
-                    if(hasModified && ServerConfig.SPAWN_ENTITY_MODIFIER_REMOVAL.get()) {
-                        PortalData portalData = portalSavedData.getFirstActivePortalData();
-                        int removed = portalData.getModifiersRemoved();
-                        int actStep = removed / ServerConfig.ENTITY_STEP.get(); // Technical step, ignoring max cap, for bosses
-                        int step = Math.min(actStep, 4); // used for spawning dwellers
-
-                        EntityType<?> entityType;
-                        if (actStep == 5) {
-                            String str = ServerConfig.BOSS_ENTITIES.get().get(new Random().nextInt(ServerConfig.BOSS_ENTITIES.get().size()));
-                            entityType = EntityType.byString(str).orElse(null); // Spawn boss
-                            portalData.setModifiersRemoved(0); // Reset modifiers removed after spawning boss
-                        } else {
-                            // Spawn fighters for steps 0-4
-                            entityType = EntityType.byString("the_vault:vault_fighter_" + step).orElse(null);
-                        }
-
-                        if (entityType != null) {
-                            Entity e = entityType.create(level);
-                            if (e != null) {
-                                e.moveTo(portalTilePositions.get(0).getX() + 0.5, portalTilePositions.get(0).getY(), portalTilePositions.get(0).getZ() + 0.5);
-
-                                if (e instanceof LivingEntity livingEntity) {
-                                    // Modify health based on step
-                                    var healthAttribute = livingEntity.getAttribute(Attributes.MAX_HEALTH);
-                                    if (healthAttribute != null) {
-                                        double baseHealth = actStep == 5 ? 150.0 : 12.5 + (step * 7.5);
-                                        healthAttribute.setBaseValue(baseHealth);
-                                        livingEntity.setHealth((float) baseHealth);
-                                    }
-
-                                    // Modify attack damage based on step
-                                    var attackAttribute = livingEntity.getAttribute(Attributes.ATTACK_DAMAGE);
-                                    if (attackAttribute != null) {
-                                        double baseDamage = actStep == 5 ? 4.0 : 2.0 + (step * 0.5); // Boss or fighters' damage
-                                        attackAttribute.setBaseValue(baseDamage);
-                                    }
-                                }
-
-                                level.addFreshEntity(e);
-                            }
-                        }
-                    }
-                    activePortalTickCounter = 0; // Reset the counter after execution
-                    actlRemoveModifierTimer = getRandomRemoveModifierTimer(); //reset the random counter thingy yadda yadda
                 }
+
+                // Get the iterator for the portalTilePositions list
+                Iterator<BlockPos> iterator = portalTilePositions.iterator();
+
+                while (iterator.hasNext()) {
+                    BlockPos pos = iterator.next();
+
+                    if (portalLevel.isLoaded(pos)) {  // Only process if chunk is loaded
+                        BlockState blockState = portalLevel.getBlockState(pos);
+
+                        // Check if the block is still a portal block before accessing the tile entity
+                        if (blockState.is(ModBlocks.VAULT_PORTAL)) {
+                            VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(pos);
+                            if (portalTileEntity != null && portalTileEntity.getData().isPresent()) {
+                                portalTileEntity.getData().ifPresent(data -> handleModifierRemoval(data, randInt));
+                            }
+                        } else {
+                            OverVaults.LOGGER.warn("Activated portal was invalidated. Correcting.");
+                            // Remove the portal tile entity from the data and the chunk position
+                            iterator.remove();  // Use the iterator to safely remove the current element
+                            entityChunkData.removePortalTileEntityData();
+                            entityChunkData.removeChunkPositionData();
+                            portalData.setActiveState(false);
+                            portalSavedData.setDirty();
+                        }
+                    }
+                }
+                if(hasModified && ServerConfig.SPAWN_ENTITY_MODIFIER_REMOVAL.get()) {
+                    int removed = portalData.getModifiersRemoved();
+                    int actStep = removed / ServerConfig.ENTITY_STEP.get(); // Technical step, ignoring max cap, for bosses
+                    int step = Math.min(actStep, 4); // used for spawning dwellers
+
+                    EntityType<?> entityType;
+                    if (actStep == 5) {
+                        String str = ServerConfig.BOSS_ENTITIES.get().get(new Random().nextInt(ServerConfig.BOSS_ENTITIES.get().size()));
+                        entityType = EntityType.byString(str).orElse(null); // Spawn boss
+                        portalData.setModifiersRemoved(0); // Reset modifiers removed after spawning boss
+                    } else {
+                        // Spawn fighters for steps 0-4
+                        entityType = EntityType.byString("the_vault:vault_fighter_" + step).orElse(null);
+                    }
+
+                    if (entityType != null) {
+                        Entity e = entityType.create(portalLevel);
+                        if (e != null) {
+                            e.moveTo(portalTilePositions.get(0).getX() + 0.5, portalTilePositions.get(0).getY(), portalTilePositions.get(0).getZ() + 0.5);
+
+                            if (e instanceof LivingEntity livingEntity) {
+                                // Modify health based on step
+                                var healthAttribute = livingEntity.getAttribute(Attributes.MAX_HEALTH);
+                                if (healthAttribute != null) {
+                                    double baseHealth = actStep == 5 ? 150.0 : 12.5 + (step * 7.5);
+                                    healthAttribute.setBaseValue(baseHealth);
+                                    livingEntity.setHealth((float) baseHealth);
+                                }
+
+                                // Modify attack damage based on step
+                                var attackAttribute = livingEntity.getAttribute(Attributes.ATTACK_DAMAGE);
+                                if (attackAttribute != null) {
+                                    double baseDamage = actStep == 5 ? 4.0 : 2.0 + (step * 0.5); // Boss or fighters' damage
+                                    attackAttribute.setBaseValue(baseDamage);
+                                }
+                            }
+
+                            portalLevel.addFreshEntity(e);
+                        }
+                    }
+                }
+                activePortalTickCounter = 0; // Reset the counter after execution
+                actlRemoveModifierTimer = getRandomRemoveModifierTimer(); //reset the random counter thingy yadda yadda
             }
-        });
+        }
     }
 
 
