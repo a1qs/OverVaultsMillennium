@@ -20,6 +20,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.event.TickEvent;
@@ -30,6 +34,8 @@ import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static fr.denisd3d.mc2discord.shadow.org.json.XMLTokener.entity;
 
 public class ServerTickEvent {
     private static final Random random = new Random();
@@ -130,6 +136,7 @@ public class ServerTickEvent {
 
                 if(actlRemoveModifierTimer == -1) actlRemoveModifierTimer = getRandomRemoveModifierTimer();
                 if (shouldModifyPortal(actlRemoveModifierTimer)) {
+                    boolean hasModified = false;
                     BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
                     List<BlockPos> portalTilePositions = entityChunkData.getPortalTilePositions();
 
@@ -145,6 +152,12 @@ public class ServerTickEvent {
                             List<VaultModifierStack> modifierList = firstPortalTileEntity.getData().get().getModifiers().getList();
                             if (!modifierList.isEmpty()) {
                                 randInt.set(random.nextInt(modifierList.size()));
+                                hasModified = true;
+                                if(portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
+                                    portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
+                                } else {
+                                    portalSavedData.getFirstActivePortalData().addModifiersRemoved(1);
+                                }
                             }
                         }
                     }
@@ -165,6 +178,7 @@ public class ServerTickEvent {
                                     portalTileEntity.getData().ifPresent(data -> handleModifierRemoval(data, randInt));
                                 }
                             } else {
+                                OverVaults.LOGGER.warn("Activated portal was invalidated. Correcting.");
                                 // Remove the portal tile entity from the data and the chunk position
                                 iterator.remove();  // Use the iterator to safely remove the current element
                                 entityChunkData.removePortalTileEntityData();
@@ -178,12 +192,53 @@ public class ServerTickEvent {
                             }
                         }
                     }
+                    if(hasModified && ServerConfig.SPAWN_ENTITY_MODIFIER_REMOVAL.get()) {
+                        PortalData portalData = portalSavedData.getFirstActivePortalData();
+                        int removed = portalData.getModifiersRemoved();
+                        int actStep = removed / ServerConfig.ENTITY_STEP.get(); // Technical step, ignoring max cap, for bosses
+                        int step = Math.min(actStep, 4); // used for spawning dwellers
+
+                        EntityType<?> entityType;
+                        if (actStep == 5) {
+                            String str = ServerConfig.BOSS_ENTITIES.get().get(new Random().nextInt(ServerConfig.BOSS_ENTITIES.get().size()));
+                            entityType = EntityType.byString(str).orElse(null); // Spawn boss
+                            portalData.setModifiersRemoved(0); // Reset modifiers removed after spawning boss
+                        } else {
+                            // Spawn fighters for steps 0-4
+                            entityType = EntityType.byString("the_vault:vault_fighter_" + step).orElse(null);
+                        }
+
+                        if (entityType != null) {
+                            Entity e = entityType.create(level);
+                            if (e != null) {
+                                e.moveTo(portalTilePositions.get(0).getX() + 0.5, portalTilePositions.get(0).getY(), portalTilePositions.get(0).getZ() + 0.5);
+
+                                if (e instanceof LivingEntity livingEntity) {
+                                    // Modify health based on step
+                                    var healthAttribute = livingEntity.getAttribute(Attributes.MAX_HEALTH);
+                                    if (healthAttribute != null) {
+                                        double baseHealth = actStep == 5 ? 150.0 : 12.5 + (step * 7.5);
+                                        healthAttribute.setBaseValue(baseHealth);
+                                        livingEntity.setHealth((float) baseHealth);
+                                    }
+
+                                    // Modify attack damage based on step
+                                    var attackAttribute = livingEntity.getAttribute(Attributes.ATTACK_DAMAGE);
+                                    if (attackAttribute != null) {
+                                        double baseDamage = actStep == 5 ? 4.0 : 2.0 + (step * 0.5); // Boss or fighters' damage
+                                        attackAttribute.setBaseValue(baseDamage);
+                                    }
+                                }
+
+                                level.addFreshEntity(e);
+                            }
+                        }
+                    }
                     activePortalTickCounter = 0; // Reset the counter after execution
                     actlRemoveModifierTimer = getRandomRemoveModifierTimer(); //reset the random counter thingy yadda yadda
                 }
             }
         });
-
     }
 
 
