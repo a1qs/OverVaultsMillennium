@@ -80,4 +80,16 @@ public class PortalData {
         result = 31 * result + dimension.hashCode();
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "PortalData{" +
+                "rotation=" + rotation +
+                ", portalFrameCenterPos=" + portalFrameCenterPos +
+                ", size=" + size +
+                ", dimension=" + dimension +
+                ", activated=" + activated +
+                ", modifiersRemoved=" + modifiersRemoved +
+                '}';
+    }
 }
