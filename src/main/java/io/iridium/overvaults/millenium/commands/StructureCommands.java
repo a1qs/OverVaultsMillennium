@@ -159,14 +159,16 @@ public class StructureCommands extends BaseCommand {
 
     public int getClosestStructure(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer player = context.getSource().getPlayerOrException();
-        Pair<Integer, Double> closestPortalData = PortalUtil.getClosestPortalDataIndexAndDistance(player);
+        List<PortalData> originalList = PortalSavedData.getServer().getPortalData();
+        Pair<PortalData, Double> closestPortalData = PortalUtil.getClosestPortalData(player);
 
         if (closestPortalData == null) {
             context.getSource().sendFailure(new TextComponent("No valid portal data found in the dimension of the Player."));
             return 1;
         }
 
-        int index = closestPortalData.getFirst();
+        PortalData portalData = closestPortalData.getFirst();
+        int index = originalList.indexOf(portalData);
         double distance = closestPortalData.getSecond();
 
         MutableComponent cmp = TextUtil.getPortalTpComponent(index, PortalSavedData.get(player.getLevel()).getPortalData().get(index));
