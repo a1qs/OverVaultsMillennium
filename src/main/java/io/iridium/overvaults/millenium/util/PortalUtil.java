@@ -66,29 +66,32 @@ public class PortalUtil {
     }
 
     /**
-     * Helper method to get the Closest Portal to the player
+     * Helper method to get the Closest Portal to the player.
      *
-     * @param player the Player which the distance gets checked of
-     * @return a Pair containing an Integer (index of the Portal) & a Double (the distance between the Portal & the Player)
+     * @param player the Player whose distance is being checked.
+     * @return a Pair containing the PortalData of the closest Portal & the distance between the Portal and the Player.
      */
-    public static Pair<Integer, Double> getClosestPortalDataIndexAndDistance(ServerPlayer player) {
+    public static Pair<PortalData, Double> getClosestPortalData(ServerPlayer player) {
         BlockPos playerPos = player.blockPosition();
 
+        // Get the filtered list of portals in the player's level
         List<PortalData> filteredPortalList = filteredPortalList(player.getLevel());
-        int closestIndex = -1;
+
+        PortalData closestPortal = null;
         double closestDistance = Double.MAX_VALUE;
 
-        for (int i = 0; i < filteredPortalList.size(); i++) {
-            PortalData data = filteredPortalList.get(i);
+        // Iterate through the portal list to find the closest one
+        for (PortalData data : filteredPortalList) {
             double distance = data.getPortalFrameCenterPos().distSqr(playerPos);
 
             if (distance < closestDistance) {
                 closestDistance = distance;
-                closestIndex = i;
+                closestPortal = data;
             }
         }
 
-        return closestIndex == -1 ? null : new Pair<>(closestIndex, Math.sqrt(closestDistance));
+        // Return the closest PortalData and the square root of the distance (Euclidean distance)
+        return closestPortal == null ? null : new Pair<>(closestPortal, Math.sqrt(closestDistance));
     }
 
     /**
