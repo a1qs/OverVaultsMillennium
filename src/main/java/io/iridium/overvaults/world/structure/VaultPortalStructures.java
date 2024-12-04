@@ -72,8 +72,6 @@ public class VaultPortalStructures extends StructureFeature<JigsawConfiguration>
 
 
     public static Optional<PieceGenerator<JigsawConfiguration>> createPiecesGenerator(PieceGeneratorSupplier.Context<JigsawConfiguration> context) {
-
-
         BlockPos blockpos = context.chunkPos().getMiddleBlockPosition(0);
 
         // Get the height of the surface
@@ -86,6 +84,9 @@ public class VaultPortalStructures extends StructureFeature<JigsawConfiguration>
         // Check if the block at the surface is water
         boolean isWater = blockState.getFluidState().isSource();
 
+        if (surfaceY < 16) {
+            return Optional.empty();
+        }
 
         if (!isWater && !VaultPortalStructures.isValidFlatLand(context)) {
             return Optional.empty();
