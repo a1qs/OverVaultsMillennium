@@ -44,37 +44,44 @@ public class ServerTickEvent {
         ServerLevel level = server.getLevel(Level.OVERWORLD);
         if(level == null) return;
 
-
+        PortalSavedData portalSavedData = PortalSavedData.get(level);
         if(actlTicksForPortalSpawn == -1) actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
 
         // Check if the counter has reached the limit for portal spawning
         if (shouldSpawnPortal(actlTicksForPortalSpawn)) {
-            PortalSavedData portalSavedData = PortalSavedData.get(level);
-            List<PortalData> portalDataList = portalSavedData.getPortalData();
+            List<PortalData> portalDataList = new ArrayList<>(portalSavedData.getPortalData());
+            Collections.shuffle(portalDataList);
 
             if (portalDataList != null && !portalDataList.isEmpty()) {
-                PortalData data = PortalUtil.getRandomPortalData(portalDataList);
-                ServerLevel portalLevel = server.getLevel(data.getDimension());
-                if(portalLevel == null) {
-                    OverVaults.LOGGER.error("Level {} equals null. Please report this.", data.getDimension());
-                    counter = 0;
-                    return;
+                boolean portalActivated = false;
+
+                for (PortalData data : portalDataList) {
+                    ServerLevel portalLevel = server.getLevel(data.getDimension());
+                    if (portalLevel == null) {
+                        OverVaults.LOGGER.error("Level {} equals null. Please report this.", data.getDimension());
+                        continue; // Skip this portal
+                    }
+
+                    if (PortalUtil.activatePortal(server, data)) {
+                        actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
+                        counter = 0;
+                        portalActivated = true;
+                        break; // Successfully activated a portal, no need to check others
+                    }
                 }
 
-                PortalUtil.activatePortal(server, data);
-                actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
-                counter = 0;
+                if (!portalActivated) {
+                    OverVaults.LOGGER.warn("No valid portals were found to activate.");
+                }
             }
         }
 
 
         // Increment the counter only if there's no active portal across all dimensions
-        if (PortalSavedData.get(level).hasActiveOverVault() && counter < Integer.MAX_VALUE) {
+        if (!PortalSavedData.get(level).hasActiveOverVault() && counter < Integer.MAX_VALUE) {
             counter++;
         }
 
-
-        PortalSavedData portalSavedData = PortalSavedData.get(level);
         if (portalSavedData.hasActiveOverVault()) {
             activePortalTickCounter++;
 
@@ -124,7 +131,7 @@ public class ServerTickEvent {
                                 portalTileEntity.getData().ifPresent(data -> handleModifierRemoval(data, randInt));
                             }
                         } else {
-                            OverVaults.LOGGER.warn("Activated portal was invalidated. Correcting.");
+                            OverVaults.LOGGER.error("Activated portal was invalidated. Removing.");
                             // Remove the portal tile entity from the data and the chunk position
                             iterator.remove();  // Use the iterator to safely remove the current element
                             entityChunkData.removePortalTileEntityData();
