@@ -104,7 +104,7 @@ public class StructureTrackingEventHandler {
             new ResourceLocation("overvaults:portal1_leafy_ruin0"), new Pair<>(StructureSize.LARGE, Map.of(
                     Rotation.NONE, new BlockPos(-1, -1, -1),
                     Rotation.CLOCKWISE_90, new BlockPos(0, -1, -1),
-                    Rotation.CLOCKWISE_180, new BlockPos(-1, -1, 0),
+                    Rotation.CLOCKWISE_180, new BlockPos(0, -1, 0),
                     Rotation.COUNTERCLOCKWISE_90, new BlockPos(-1, -1, 0)
             ))
     );
