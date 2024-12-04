@@ -27,6 +27,7 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -225,8 +226,9 @@ public class StructureCommands extends BaseCommand {
         MinecraftServer server = context.getSource().getServer();
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(server);
         PortalSavedData portalSavedData = PortalSavedData.get(server);
+        List<PortalData> portalDataList = new ArrayList<>(portalSavedData.getPortalData());
 
-        for(PortalData data : portalSavedData.getPortalData()) {
+        for(PortalData data : portalDataList) {
             List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(server.getLevel(data.getDimension()), data);
 
             for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
@@ -268,10 +270,14 @@ public class StructureCommands extends BaseCommand {
             return 1;
         }
 
-
         PortalData portalToOpen = portalDataList.get(index);
-        PortalUtil.activatePortal(ServerLifecycleHooks.getCurrentServer(), portalToOpen);
-        context.getSource().sendSuccess(new TextComponent("Activated Portal with index: " + index).withStyle(ChatFormatting.YELLOW), true);
-        return 0;
+        boolean active = PortalUtil.activatePortal(ServerLifecycleHooks.getCurrentServer(), portalToOpen);
+        if(active) {
+            context.getSource().sendSuccess(new TextComponent("Activated Portal with index: " + index).withStyle(ChatFormatting.YELLOW), true);
+            return 0;
+        }
+
+        context.getSource().sendFailure(new TextComponent("Could not activate the given portal. Check logs"));
+        return 1;
     }
 }
