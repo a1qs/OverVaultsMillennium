@@ -1,12 +1,15 @@
 package io.iridium.overvaults.millenium.util;
 
 import com.mojang.datafixers.util.Pair;
+import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
+import io.iridium.overvaults.millenium.world.StructureSize;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
@@ -17,7 +20,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
 
 import java.util.*;
@@ -121,11 +126,18 @@ public class PortalUtil {
         }
     }
 
-    public static void activatePortal(MinecraftServer server, PortalData data) {
+    public static boolean activatePortal(MinecraftServer server, PortalData data) {
         ServerLevel portalLevel = server.getLevel(data.getDimension());
         if(portalLevel == null) {
-            return;
+            OverVaults.LOGGER.error("Attempted to activate an Overvault portal, but the Level of the portal equals null.");
+            return false;
         }
+        boolean valid = PortalUtil.hasValidFrameBlocks(portalLevel, data);
+        if(!valid) {
+            OverVaults.LOGGER.error("Attempted to activate Overvault portal, but the given portal had an invalid frame.");
+            return false;
+        }
+
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.getServer();
         PortalSavedData portalSavedData = PortalSavedData.getServer();
         List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(portalLevel, data);
@@ -133,10 +145,51 @@ public class PortalUtil {
         for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
             entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
         }
+
         data.setActiveState(true);
         entityChunkData.setDirty();
         portalSavedData.setDirty();
-
         notifyPlayers(server, data);
+        return true;
+    }
+
+    public static boolean hasValidFrameBlocks(ServerLevel level, PortalData data) {
+        Block[] validFrameBlocks = ModConfigs.VAULT_PORTAL.getValidFrameBlocks();
+
+        // Positions to check around the portal center
+        BlockPos[] positions;
+        if (Objects.requireNonNull(data.getSize()) == StructureSize.SMALL) {
+            positions = new BlockPos[]{
+                    data.getPortalFrameCenterPos().east(2),
+                    data.getPortalFrameCenterPos().west(2),
+                    data.getPortalFrameCenterPos().north(2),
+                    data.getPortalFrameCenterPos().south(2)
+            };
+        } else {
+            positions = new BlockPos[]{
+                    data.getPortalFrameCenterPos().east(3),
+                    data.getPortalFrameCenterPos().west(3),
+                    data.getPortalFrameCenterPos().north(3),
+                    data.getPortalFrameCenterPos().south(3)
+            };
+        }
+
+        int validCount = 0;
+        for (BlockPos pos : positions) {
+            BlockState blockState = level.getBlockState(pos);
+
+            // Check if the block matches any of the valid frame blocks
+            for (Block validBlock : validFrameBlocks) {
+                if (blockState.getBlock() == validBlock) {
+                    validCount++;
+                    break;
+                } else {
+                    OverVaults.LOGGER.warn("Expected valid frame block at {} but found {}", pos, blockState.getBlock());
+                }
+            }
+        }
+
+
+        return validCount >= 2; // Return true if at least 2 valid blocks are found
     }
 }
