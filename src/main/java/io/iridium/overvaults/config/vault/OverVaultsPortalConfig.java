@@ -9,7 +9,6 @@ import io.iridium.overvaults.config.vault.entry.ModifierStackEntry;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.Config;
 import iskallia.vault.core.random.JavaRandom;
-import iskallia.vault.core.util.WeightedList;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.core.vault.modifier.registry.VaultModifierRegistry;
 import iskallia.vault.core.vault.modifier.spi.VaultModifier;
@@ -20,6 +19,7 @@ import iskallia.vault.item.crystal.model.RawCrystalModel;
 import iskallia.vault.item.crystal.objective.EmptyCrystalObjective;
 import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
+import iskallia.vault.util.data.WeightedList;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -27,7 +27,6 @@ import net.minecraft.world.level.Level;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public class OverVaultsPortalConfig extends Config {
@@ -52,7 +51,7 @@ public class OverVaultsPortalConfig extends Config {
         CHANCE_OF_NETHER_THEME_IN_NETHER = 0.10F;
         CHANCE_OF_VOID_THEME_IN_END = 0.075F;
 
-        MODIFIER_LISTS.put(
+        MODIFIER_LISTS.add(
                 List.of(
                         new ModifierStackEntry(new ResourceLocation("the_vault:energizing"), 1),
                         new ModifierStackEntry(new ResourceLocation("the_vault:soul_boost"), 1),
@@ -62,7 +61,7 @@ public class OverVaultsPortalConfig extends Config {
                 75
         );
 
-        MODIFIER_LISTS.put(
+        MODIFIER_LISTS.add(
                 List.of(
                         new ModifierStackEntry(new ResourceLocation("the_vault:prosperous"), 1),
                         new ModifierStackEntry(new ResourceLocation("the_vault:haunted"), 3),
@@ -73,7 +72,7 @@ public class OverVaultsPortalConfig extends Config {
                 ),
                 20
         );
-        MODIFIER_LISTS.put(
+        MODIFIER_LISTS.add(
                 List.of(
                         new ModifierStackEntry(new ResourceLocation("the_vault:prosperous"), 25)
                 ),
@@ -112,14 +111,15 @@ public class OverVaultsPortalConfig extends Config {
         }
 
 
-        Optional<List<ModifierStackEntry>> d = cfg.MODIFIER_LISTS.getRandom();
-        if(d.isPresent()) {
-            for(ModifierStackEntry stack : d.get()) {
+        List<ModifierStackEntry> modifierStackEntries = cfg.MODIFIER_LISTS.getRandom(Config.rand);
+        if (modifierStackEntries != null) {
+            for(ModifierStackEntry stack : modifierStackEntries) {
                 crystal.getModifiers().add(VaultModifierStack.of(VaultModifierRegistry.get(stack.getModifierId()), stack.getAmount()));
             }
         } else {
             OverVaults.LOGGER.error("Found invalid modifier list inside of '{}' config!", VaultConfigRegistry.OVERVAULTS_PORTAL_CONFIG.getName());
         }
+
 
         if(dimension.equals(Level.NETHER) && RANDOM.nextFloat() <= cfg.CHANCE_OF_NETHER_THEME_IN_NETHER) {
             crystal.setTheme(new ValueCrystalTheme(
