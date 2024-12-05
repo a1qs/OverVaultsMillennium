@@ -141,20 +141,12 @@ public class StructureTrackingEventHandler {
                         if(validStructures.contains(templateName)) {
                             Rotation rotation = poolPiece.getRotation();
                             BlockPos portalFramePos = pos.offset(structureRotationOffsets.get(templateName).getSecond().get(rotation));
-                            WorldBorder worldBorder = level.getWorldBorder();
-                            PortalSavedData savedData = PortalSavedData.get(level);
 
-                            //Config check whether to respect World Border when adding Valid Structures
-                            if(ServerConfig.RESPECT_WORLD_BORDER.get()) {
-                                if(worldBorder.isWithinBounds(portalFramePos)) {
-                                    PortalData portalData = new PortalData(rotation, portalFramePos, structureRotationOffsets.get(templateName).getFirst(), level.dimension(), false, -1);
-                                    savedData.addPortalData(portalData);
-                                    //size.getBlockPositions(portalFramePos, rotation).forEach(position -> System.out.println("Block at: " + position));
-                                }
-                            } else {
-                                PortalData portalData = new PortalData(rotation, portalFramePos, structureRotationOffsets.get(templateName).getFirst(), level.dimension(), false, -1);
-                                savedData.addPortalData(portalData);
-                            }
+
+                            PortalData portalData = new PortalData(rotation, portalFramePos, structureRotationOffsets.get(templateName).getFirst(), level.dimension(), false, -1);
+                            PortalSavedData savedData = PortalSavedData.get(level);
+                            savedData.addPortalData(portalData);
+                            //size.getBlockPositions(portalFramePos, rotation).forEach(position -> System.out.println("Block at: " + position));
 
                         }
                     }

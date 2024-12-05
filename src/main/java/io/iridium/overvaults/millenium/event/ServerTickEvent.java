@@ -19,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -60,6 +61,13 @@ public class ServerTickEvent {
                     if (portalLevel == null) {
                         OverVaults.LOGGER.error("Level {} equals null. Please report this.", data.getDimension());
                         continue; // Skip this portal
+                    }
+
+                    if(ServerConfig.RESPECT_WORLD_BORDER.get()) {
+                        WorldBorder worldBorder = level.getWorldBorder();
+                        if(!worldBorder.isWithinBounds(data.getPortalFrameCenterPos())) {
+                            continue; // If the border is not within the portal bounds; skip this portal
+                        }
                     }
 
                     if (PortalUtil.activatePortal(server, data)) {
