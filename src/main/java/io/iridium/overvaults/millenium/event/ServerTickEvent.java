@@ -1,7 +1,6 @@
 package io.iridium.overvaults.millenium.event;
 
 import io.iridium.overvaults.OverVaults;
-import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
@@ -14,11 +13,6 @@ import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
@@ -31,12 +25,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerTickEvent {
-    private static final Random random = new Random();
     public static int counter = 0; // Counter used to track the time to the next Portal Spawn
 
     public static int actlTicksForPortalSpawn = -1; // Field to track which time is required for the next Vault Portal Spawn
-    private static int actlRemoveModifierTimer = -1; // Field to track which time is required for the next Modifer Portal Removal
-    private static int activePortalTickCounter = 0; // Field to track the time an OverVault is active
+    public static int activePortalTickCounter = 0; // Field to track the time an OverVault is active
+    public static int actlRemoveModifierTimer = -1; // Field to track which time is required for the next Modifer Portal Removal
 
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onServerTick(TickEvent.ServerTickEvent event) {
@@ -151,47 +144,13 @@ public class ServerTickEvent {
                         }
                     }
                 }
+
                 if(hasModified && VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SPAWN_ENTITY_MODIFIER_REMOVAL) {
                     int removed = portalData.getModifiersRemoved();
-                    int actStep = removed / ServerConfig.ENTITY_STEP.get(); // Technical step, ignoring max cap, for bosses
-                    int step = Math.min(actStep, 4); // used for spawning dwellers
-
-                    EntityType<?> entityType;
-                    if (actStep == 5) {
-                        String str = ServerConfig.BOSS_ENTITIES.get().get(new Random().nextInt(ServerConfig.BOSS_ENTITIES.get().size()));
-                        entityType = EntityType.byString(str).orElse(null); // Spawn boss
-                        portalData.setModifiersRemoved(0); // Reset modifiers removed after spawning boss
-                    } else {
-                        // Spawn fighters for steps 0-4
-                        entityType = EntityType.byString("the_vault:vault_fighter_" + step).orElse(null);
-                    }
-
-                    if (entityType != null) {
-                        Entity e = entityType.create(portalLevel);
-                        if (e != null) {
-                            e.moveTo(portalTilePositions.get(0).getX() + 0.5, portalTilePositions.get(0).getY(), portalTilePositions.get(0).getZ() + 0.5);
-
-                            if (e instanceof LivingEntity livingEntity) {
-                                // Modify health based on step
-                                var healthAttribute = livingEntity.getAttribute(Attributes.MAX_HEALTH);
-                                if (healthAttribute != null) {
-                                    double baseHealth = actStep == 5 ? 150.0 : 12.5 + (step * 7.5);
-                                    healthAttribute.setBaseValue(baseHealth);
-                                    livingEntity.setHealth((float) baseHealth);
-                                }
-
-                                // Modify attack damage based on step
-                                var attackAttribute = livingEntity.getAttribute(Attributes.ATTACK_DAMAGE);
-                                if (attackAttribute != null) {
-                                    double baseDamage = actStep == 5 ? 4.0 : 2.0 + (step * 0.5); // Boss or fighters' damage
-                                    attackAttribute.setBaseValue(baseDamage);
-                                }
-                            }
-                            if(e instanceof Mob) ((Mob) e).setPersistenceRequired();
-                            portalLevel.addFreshEntity(e);
-                        }
-                    }
+                    int step = removed / VaultConfigRegistry.OVERVAULTS_MOB_CONFIG.MODIFIERS_TO_REMOVE_UNTIL_TIER_UP; // Technical step, ignoring max cap, for bosses
+                    VaultConfigRegistry.OVERVAULTS_MOB_CONFIG.addPortalEntityToWorld(portalLevel, step, portalData);
                 }
+
                 activePortalTickCounter = 0; // Reset the counter after execution
                 actlRemoveModifierTimer = getRandomRemoveModifierTimer(); //reset the random counter thingy yadda yadda
             }
@@ -238,18 +197,14 @@ public class ServerTickEvent {
      * Returns a random value for the ticks until portal spawn.
      */
     private static int getRandomTicksForPortalSpawn() {
-        int minTicksForPortalSpawn = ServerConfig.MIN_SECONDS_UNTIL_PORTAL_SPAWN.get() * 20;
-        int maxTicksForPortalSpawn = ServerConfig.MAX_SECONDS_UNTIL_PORTAL_SPAWN.get() * 20;
-        return random.nextInt(maxTicksForPortalSpawn - minTicksForPortalSpawn + 1) + minTicksForPortalSpawn;
+        return VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SECONDS_UNTIL_PORTAL_SPAWN.getRandom();
     }
 
     /**
      * Returns a random value for the ticks until modifier removal.
      */
     private static int getRandomRemoveModifierTimer() {
-        int minRemoveModifierTimer = ServerConfig.MIN_SECONDS_UNTIL_MODIFIER_REMOVAL.get() * 20;
-        int maxRemoveModifierTimer = ServerConfig.MAX_SECONDS_UNTIL_MODIFIER_REMOVAL.get() * 20;
-        return random.nextInt(maxRemoveModifierTimer - minRemoveModifierTimer + 1) + minRemoveModifierTimer;
+        return VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SECONDS_UNTIL_MODIFIER_REMOVAL.getRandom();
     }
 
 
