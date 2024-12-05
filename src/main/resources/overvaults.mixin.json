@@ -4,6 +4,7 @@
   "package": "io.iridium.overvaults.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "MixinModConfigs",
     "VaultPortalBlockMixin"
   ],
   "refmap": "overvaults.mixin-refmap.json",
