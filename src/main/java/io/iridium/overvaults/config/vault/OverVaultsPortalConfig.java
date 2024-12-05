@@ -5,7 +5,7 @@ package io.iridium.overvaults.config.vault;
 import com.google.gson.annotations.Expose;
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.VaultConfigRegistry;
-import io.iridium.overvaults.config.vault.ds.ModifierStack;
+import io.iridium.overvaults.config.vault.entry.ModifierStackEntry;
 import iskallia.vault.VaultMod;
 import iskallia.vault.config.Config;
 import iskallia.vault.core.random.JavaRandom;
@@ -36,7 +36,7 @@ public class OverVaultsPortalConfig extends Config {
     @Expose public float CHANCE_OF_RAW_VAULT;
     @Expose public float CHANCE_OF_NETHER_THEME_IN_NETHER;
     @Expose public float CHANCE_OF_VOID_THEME_IN_END;
-    @Expose public WeightedList<List<ModifierStack>> MODIFIER_LISTS = new WeightedList<>();
+    @Expose public WeightedList<List<ModifierStackEntry>> MODIFIER_LISTS = new WeightedList<>();
     @Expose public List<ResourceLocation> NETHER_VAULT_THEMES = new ArrayList<>();
     @Expose public List<ResourceLocation> VOID_VAULT_THEMES = new ArrayList<>();
 
@@ -54,28 +54,28 @@ public class OverVaultsPortalConfig extends Config {
 
         MODIFIER_LISTS.put(
                 List.of(
-                        new ModifierStack(new ResourceLocation("the_vault:energizing"), 1),
-                        new ModifierStack(new ResourceLocation("the_vault:soul_boost"), 1),
-                        new ModifierStack(new ResourceLocation("the_vault:item_quantity"), 3),
-                        new ModifierStack(new ResourceLocation("the_vault:item_rarity"), 3)
+                        new ModifierStackEntry(new ResourceLocation("the_vault:energizing"), 1),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:soul_boost"), 1),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:item_quantity"), 3),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:item_rarity"), 3)
                 ),
                 75
         );
 
         MODIFIER_LISTS.put(
                 List.of(
-                        new ModifierStack(new ResourceLocation("the_vault:prosperous"), 1),
-                        new ModifierStack(new ResourceLocation("the_vault:haunted"), 3),
-                        new ModifierStack(new ResourceLocation("the_vault:coin_pile"), 3),
-                        new ModifierStack(new ResourceLocation("the_vault:gilded"), 3),
-                        new ModifierStack(new ResourceLocation("the_vault:ornate"), 3),
-                        new ModifierStack(new ResourceLocation("the_vault:living"), 3)
+                        new ModifierStackEntry(new ResourceLocation("the_vault:prosperous"), 1),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:haunted"), 3),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:coin_pile"), 3),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:gilded"), 3),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:ornate"), 3),
+                        new ModifierStackEntry(new ResourceLocation("the_vault:living"), 3)
                 ),
                 20
         );
         MODIFIER_LISTS.put(
                 List.of(
-                        new ModifierStack(new ResourceLocation("the_vault:prosperous"), 25)
+                        new ModifierStackEntry(new ResourceLocation("the_vault:prosperous"), 25)
                 ),
                 5
         );
@@ -112,9 +112,9 @@ public class OverVaultsPortalConfig extends Config {
         }
 
 
-        Optional<List<ModifierStack>> d = cfg.MODIFIER_LISTS.getRandom();
+        Optional<List<ModifierStackEntry>> d = cfg.MODIFIER_LISTS.getRandom();
         if(d.isPresent()) {
-            for(ModifierStack stack : d.get()) {
+            for(ModifierStackEntry stack : d.get()) {
                 crystal.getModifiers().add(VaultModifierStack.of(VaultModifierRegistry.get(stack.getModifierId()), stack.getAmount()));
             }
         } else {
