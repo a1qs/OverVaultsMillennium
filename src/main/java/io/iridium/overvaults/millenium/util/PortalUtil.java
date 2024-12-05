@@ -3,6 +3,7 @@ package io.iridium.overvaults.millenium.util;
 import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.VaultConfigRegistry;
+import io.iridium.overvaults.config.vault.OverVaultsPortalConfig;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
@@ -56,7 +57,7 @@ public class PortalUtil {
         }
 
 
-        CrystalData originalCrystalData = PortalNbtUtil.getRandomCrystalData(level.dimension());
+        CrystalData originalCrystalData = OverVaultsPortalConfig.getRandomCrystalData(level.dimension());
         blocksToFill.forEach(pos -> {
             level.setBlock(pos, ModBlocks.VAULT_PORTAL.defaultBlockState().rotate(data.getRotation()), 3);
             BlockEntity te = level.getBlockEntity(pos);
