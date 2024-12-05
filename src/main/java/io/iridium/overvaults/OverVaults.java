@@ -1,7 +1,6 @@
 package io.iridium.overvaults;
 
 import com.mojang.logging.LogUtils;
-import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.event.DimensionChangeEvent;
 import io.iridium.overvaults.millenium.event.OnPlayerLogin;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;
@@ -28,9 +27,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -59,7 +56,6 @@ public class OverVaults {
         MinecraftForge.EVENT_BUS.addListener(ServerTickEvent::onServerTick);
         MinecraftForge.EVENT_BUS.addListener(DimensionChangeEvent::onDimensionChange);
         MinecraftForge.EVENT_BUS.addListener(OnPlayerLogin::onPlayerLoginEvent);
-        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, ServerConfig.SPEC, "overvaults-server.toml");
 
         ModStructures.register(modEventBus);
 
@@ -181,7 +177,6 @@ public class OverVaults {
                     }
                 }
             }
-            ;
             return null;
         }
 

@@ -3,7 +3,6 @@ package io.iridium.overvaults.millenium.event;
 
 import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.OverVaults;
-import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
 import io.iridium.overvaults.millenium.world.StructureSize;
@@ -13,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.structure.PoolElementStructurePiece;

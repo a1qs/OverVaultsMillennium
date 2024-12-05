@@ -1,6 +1,5 @@
 package io.iridium.overvaults.millenium.event;
 
-import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.TextUtil;

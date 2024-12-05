@@ -1,6 +1,5 @@
 package io.iridium.overvaults.mixin;
 
-import io.iridium.overvaults.config.ServerConfig;
 import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
