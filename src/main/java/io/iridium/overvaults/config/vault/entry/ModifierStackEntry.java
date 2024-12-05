@@ -1,16 +1,16 @@
-package io.iridium.overvaults.config.vault.ds;
+package io.iridium.overvaults.config.vault.entry;
 
 import com.google.gson.annotations.Expose;
 import net.minecraft.resources.ResourceLocation;
 
 
-public class ModifierStack {
+public class ModifierStackEntry {
     @Expose
     private ResourceLocation modifierId;
     @Expose
     private int amount;
 
-    public ModifierStack(ResourceLocation modifierId, int amount) {
+    public ModifierStackEntry(ResourceLocation modifierId, int amount) {
         this.modifierId = modifierId;
         this.amount = amount;
     }
