@@ -1,6 +1,7 @@
 package io.iridium.overvaults.millenium.event;
 
 import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.TextUtil;
 import io.iridium.overvaults.millenium.world.PortalData;
@@ -15,7 +16,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class OnPlayerLogin {
     @SubscribeEvent
     public static void onPlayerLoginEvent(PlayerEvent.PlayerLoggedInEvent event) {
-        if(!ServerConfig.BROADCAST_IN_CHAT.get()) return;
+        if(!VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.BROADCAST_IN_CHAT) return;
 
         if(event.getPlayer() instanceof ServerPlayer player) {
             PortalData data = PortalSavedData.getServer().getFirstActivePortalData();

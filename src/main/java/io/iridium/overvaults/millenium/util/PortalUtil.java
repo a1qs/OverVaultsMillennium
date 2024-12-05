@@ -2,7 +2,7 @@ package io.iridium.overvaults.millenium.util;
 
 import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.OverVaults;
-import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
@@ -114,14 +114,14 @@ public class PortalUtil {
 
     private static void notifyPlayers(MinecraftServer server, PortalData data) {
         server.getPlayerList().getPlayers().forEach(player -> {
-            if (ServerConfig.PLAY_SOUND_ON_OPEN.get())
+            if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.PLAY_SOUND_ON_OPEN)
                 player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
         });
 
-        if (ServerConfig.BROADCAST_IN_CHAT.get()) {
+        if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.BROADCAST_IN_CHAT) {
             MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
 
-            if (ServerConfig.UPDATE_VAULT_COMPASS.get())
+            if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.UPDATE_VAULT_COMPASS)
                 MiscUtil.sendCompassInfo(server.getLevel(data.getDimension()), data.getPortalFrameCenterPos());
         }
     }

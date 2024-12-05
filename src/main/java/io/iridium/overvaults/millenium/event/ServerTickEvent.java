@@ -2,6 +2,7 @@ package io.iridium.overvaults.millenium.event;
 
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
@@ -64,7 +65,7 @@ public class ServerTickEvent {
                         continue; // Skip this portal
                     }
 
-                    if(ServerConfig.RESPECT_WORLD_BORDER.get()) {
+                    if(VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.RESPECT_WORLD_BORDER) {
                         WorldBorder worldBorder = level.getWorldBorder();
                         if(!worldBorder.isWithinBounds(data.getPortalFrameCenterPos())) {
                             continue; // If the border is not within the portal bounds; skip this portal
@@ -150,7 +151,7 @@ public class ServerTickEvent {
                         }
                     }
                 }
-                if(hasModified && ServerConfig.SPAWN_ENTITY_MODIFIER_REMOVAL.get()) {
+                if(hasModified && VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SPAWN_ENTITY_MODIFIER_REMOVAL) {
                     int removed = portalData.getModifiersRemoved();
                     int actStep = removed / ServerConfig.ENTITY_STEP.get(); // Technical step, ignoring max cap, for bosses
                     int step = Math.min(actStep, 4); // used for spawning dwellers

@@ -1,6 +1,7 @@
 package io.iridium.overvaults.mixin;
 
 import io.iridium.overvaults.config.ServerConfig;
+import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
@@ -61,7 +62,7 @@ public class VaultPortalBlockMixin {
                     if(portal != null && portal.getData().isPresent()) {
                         CrystalData crystalData = portal.getData().get();
                         int vaultLevel;
-                        if (entity instanceof Player player && ServerConfig.SET_LEVEL_OF_ENTERING_PLAYER.get()) {
+                        if (entity instanceof Player player && VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SET_LEVEL_OF_ENTERING_PLAYER_OVERVAULT) {
                             vaultLevel = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player).getVaultLevel();
                         } else {
                             vaultLevel = 0;

@@ -1,12 +1,15 @@
 package io.iridium.overvaults.config;
 
+import io.iridium.overvaults.config.vault.OverVaultsGeneralConfig;
 import io.iridium.overvaults.config.vault.OverVaultsPortalConfig;
 
 public class VaultConfigRegistry {
-    public static OverVaultsPortalConfig PORTAL_CONFIG;
+    public static OverVaultsPortalConfig OVERVAULTS_PORTAL_CONFIG;
+    public static OverVaultsGeneralConfig OVERVAULTS_GENERAL_CONFIG;
 
 
     public static void registerCustomConfigs() {
-        PORTAL_CONFIG = new OverVaultsPortalConfig().readConfig();
+        OVERVAULTS_PORTAL_CONFIG = new OverVaultsPortalConfig().readConfig();
+        OVERVAULTS_GENERAL_CONFIG = new OverVaultsGeneralConfig().readConfig();
     }
 }
