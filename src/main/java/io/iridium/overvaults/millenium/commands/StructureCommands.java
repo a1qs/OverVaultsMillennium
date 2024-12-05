@@ -48,6 +48,7 @@ public class StructureCommands extends BaseCommand {
         builder.then(Commands.literal("activateAllPortals").executes(this::activateAllPortals));
         builder.then(Commands.literal("activateRandomPortal").executes(this::activateRandomPortal));
         builder.then(Commands.literal("deactivateActivePortal").executes(this::deactivateActivePortal));
+        builder.then(Commands.literal("instantlyRunModifierRemoval").executes(this::instantlyRunModifierRemoval));
     }
 
     private int getStructureList(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -279,5 +280,17 @@ public class StructureCommands extends BaseCommand {
 
         context.getSource().sendFailure(new TextComponent("Could not activate the given portal. Check logs"));
         return 1;
+    }
+
+    private int instantlyRunModifierRemoval(CommandContext<CommandSourceStack> context) {
+        PortalSavedData portalSavedData = PortalSavedData.getServer();
+        if(portalSavedData.getFirstActivePortalData() != null) {
+            context.getSource().sendSuccess(new TextComponent("Instantly modified an active Portal!").withStyle(ChatFormatting.YELLOW), true);
+            ServerTickEvent.activePortalTickCounter = ServerTickEvent.actlRemoveModifierTimer;
+            return 0;
+        } else {
+            context.getSource().sendFailure(new TextComponent("Found no active Portal Data!"));
+            return 1;
+        }
     }
 }
