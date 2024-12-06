@@ -68,7 +68,6 @@ public class LootTableCommands extends BaseCommand {
     private int addLootTableValue(CommandContext<CommandSourceStack> context) {
         ResourceLocation lootTablelocation = ResourceLocationArgument.getId(context, "lootTable");
         int weight = Integer.parseInt(StringArgumentType.getString(context, "weight"));
-        System.out.println(weight);
 
         String itemId = StringArgumentType.getString(context, "itemId");
         int newWeight = IntegerArgumentType.getInteger(context, "itemWeight");
