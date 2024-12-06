@@ -13,6 +13,7 @@ import iskallia.vault.init.ModBlocks;
 import iskallia.vault.init.ModConfigs;
 import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,12 +26,14 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
 public class PortalUtil {
+    private static final Random rand = new Random();
     public static PortalData getRandomPortalData(List<PortalData> portalDataList) {
-        return portalDataList.get(new Random().nextInt(portalDataList.size()));
+        return portalDataList.get(rand.nextInt(portalDataList.size()));
     }
 
     /**
@@ -116,7 +119,7 @@ public class PortalUtil {
     private static void notifyPlayers(MinecraftServer server, PortalData data) {
         server.getPlayerList().getPlayers().forEach(player -> {
             if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.PLAY_SOUND_ON_OPEN)
-                player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 1.0f, 1.25f);
+                player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 0.75f, 1.25f);
         });
 
         if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.BROADCAST_IN_CHAT) {
@@ -139,6 +142,20 @@ public class PortalUtil {
             return false;
         }
 
+        List<BlockPos> framePosList = data.getSize().getFrameBlockPositions(data.getPortalFrameCenterPos(), data.getRotation());
+        Block[] b = ModConfigs.VAULT_PORTAL.getValidFrameBlocks();
+        List<Block> a = new ArrayList<>(Arrays.stream(b.clone()).toList());
+        a.remove(ForgeRegistries.BLOCKS.getValue(new ResourceLocation("the_vault:bumbo_polished_vault_stone")));
+        a.remove(ForgeRegistries.BLOCKS.getValue(new ResourceLocation("the_vault:final_vault_frame")));
+        a.remove(ForgeRegistries.BLOCKS.getValue(new ResourceLocation("the_vault:vault_stone_pillar")));
+        a.remove(ForgeRegistries.BLOCKS.getValue(new ResourceLocation("the_vault:vault_cobblestone")));
+
+        for(BlockPos framePos : framePosList) {
+            Block toPlace = a.get(rand.nextInt(a.size()));
+            portalLevel.setBlock(framePos, toPlace.defaultBlockState(), Block.UPDATE_ALL);
+
+        }
+
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.getServer();
         PortalSavedData portalSavedData = PortalSavedData.getServer();
         List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(portalLevel, data);
@@ -155,38 +172,54 @@ public class PortalUtil {
     }
 
     public static boolean hasValidFrameBlocks(ServerLevel level, PortalData data) {
-        Block[] validFrameBlocks = ModConfigs.VAULT_PORTAL.getValidFrameBlocks();
+
 
         // Positions to check around the portal center
         BlockPos[] positions;
         if (Objects.requireNonNull(data.getSize()) == StructureSize.SMALL) {
-            positions = new BlockPos[]{
-                    data.getPortalFrameCenterPos().east(2),
-                    data.getPortalFrameCenterPos().west(2),
-                    data.getPortalFrameCenterPos().north(2),
-                    data.getPortalFrameCenterPos().south(2)
-            };
+            switch (data.getRotation()) {
+                case CLOCKWISE_90, COUNTERCLOCKWISE_90 -> positions = new BlockPos[]{
+                        data.getPortalFrameCenterPos().north(2),
+                        data.getPortalFrameCenterPos().south(2)
+                };
+                case CLOCKWISE_180, NONE -> positions = new BlockPos[]{
+                        data.getPortalFrameCenterPos().east(2),
+                        data.getPortalFrameCenterPos().west(2)
+                };
+                default -> throw new IllegalArgumentException("Unsupported rotation: " + data.getRotation());
+            }
         } else {
-            positions = new BlockPos[]{
-                    data.getPortalFrameCenterPos().east(3),
-                    data.getPortalFrameCenterPos().west(3),
-                    data.getPortalFrameCenterPos().north(3),
-                    data.getPortalFrameCenterPos().south(3)
-            };
+            switch (data.getRotation()) {
+                case CLOCKWISE_90, COUNTERCLOCKWISE_90 -> positions = new BlockPos[]{
+                        data.getPortalFrameCenterPos().north(3),
+                        data.getPortalFrameCenterPos().south(3)
+                };
+                case CLOCKWISE_180, NONE -> positions = new BlockPos[]{
+                        data.getPortalFrameCenterPos().east(3),
+                        data.getPortalFrameCenterPos().west(3)
+                };
+                default -> throw new IllegalArgumentException("Unsupported rotation: " + data.getRotation());
+            }
         }
 
         int validCount = 0;
+        Block[] validFrameBlocks = ModConfigs.VAULT_PORTAL.getValidFrameBlocks();
+
         for (BlockPos pos : positions) {
             BlockState blockState = level.getBlockState(pos);
+            boolean isValid = false;
 
             // Check if the block matches any of the valid frame blocks
             for (Block validBlock : validFrameBlocks) {
-                if (blockState.getBlock() == validBlock) {
+                if (blockState.is(validBlock)) {
+                    isValid = true;
                     validCount++;
                     break;
-                } else {
-                    OverVaults.LOGGER.warn("Expected valid frame block at {} but found {}", pos, blockState.getBlock());
                 }
+            }
+
+            if (!isValid) {
+                OverVaults.LOGGER.warn("Expected valid frame block at {} but found {}", pos, blockState.getBlock());
             }
         }
 
