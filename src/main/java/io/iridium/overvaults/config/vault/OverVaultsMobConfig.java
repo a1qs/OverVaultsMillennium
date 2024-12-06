@@ -35,7 +35,7 @@ public class OverVaultsMobConfig extends Config {
 
     @Override
     public String getName() {
-        return "~overvaults_mobs";
+        return "_overvaults_mobs";
     }
 
     @Override

@@ -41,7 +41,7 @@ public class OverVaultsPortalConfig extends Config {
 
     @Override
     public String getName() {
-        return "~overvaults_portals";
+        return "_overvaults_portals";
     }
 
     @Override
