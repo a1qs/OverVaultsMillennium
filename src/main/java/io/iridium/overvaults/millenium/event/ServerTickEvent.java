@@ -73,7 +73,8 @@ public class ServerTickEvent {
                 }
 
                 if (!portalActivated) {
-                    OverVaults.LOGGER.warn("No valid portals were found to activate.");
+                    OverVaults.LOGGER.warn("No valid portals were found to activate. Reset Counter");
+                    counter = 0;
                 }
             }
         }
