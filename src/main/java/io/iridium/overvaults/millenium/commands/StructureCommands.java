@@ -202,6 +202,7 @@ public class StructureCommands extends BaseCommand {
 
         entityChunkData.removePortalTileEntityData();
         data.setActiveState(false);
+        data.setModifiersRemoved(-1);
         savedData.setDirty();
         for (ChunkPos chunkPos : entityChunkData.getForceloadedChunks()) {
             level.getChunkSource().removeRegionTicket(TicketType.FORCED, chunkPos, 1, chunkPos);

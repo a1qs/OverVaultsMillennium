@@ -147,6 +147,7 @@ public class ServerTickEvent {
                             entityChunkData.removePortalTileEntityData();
                             entityChunkData.removeChunkPositionData();
                             portalData.setActiveState(false);
+                            portalData.setModifiersRemoved(-1);
                             portalSavedData.setDirty();
                         }
                     }
