@@ -22,7 +22,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ServerTickEvent {
     public static int counter = 0; // Counter used to track the time to the next Portal Spawn
@@ -48,7 +47,7 @@ public class ServerTickEvent {
             List<PortalData> portalDataList = new ArrayList<>(portalSavedData.getPortalData());
             Collections.shuffle(portalDataList);
 
-            if (portalDataList != null && !portalDataList.isEmpty()) {
+            if (!portalDataList.isEmpty()) {
                 boolean portalActivated = false;
 
                 for (PortalData data : portalDataList) {
@@ -97,7 +96,12 @@ public class ServerTickEvent {
                 boolean hasModified = false;
 
                 Random random = new Random();
-                AtomicInteger randInt = new AtomicInteger(-1);
+                int randInt = -1;
+
+                if(portalLevel == null) {
+                    OverVaults.LOGGER.error("OverVault Portal Level is null!");
+                    return;
+                }
 
                 // Pre-select a random modifier stack index for the first portal
                 if (!portalTilePositions.isEmpty()) {
@@ -107,7 +111,8 @@ public class ServerTickEvent {
                     if (firstPortalTileEntity != null && firstPortalTileEntity.getData().isPresent()) {
                         List<VaultModifierStack> modifierList = firstPortalTileEntity.getData().get().getModifiers().getList();
                         if (!modifierList.isEmpty()) {
-                            randInt.set(random.nextInt(modifierList.size()));
+                            randInt = random.nextInt(modifierList.size());
+
                             hasModified = true;
                             if(portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
                                 portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
@@ -124,6 +129,7 @@ public class ServerTickEvent {
                 while (iterator.hasNext()) {
                     BlockPos pos = iterator.next();
 
+
                     if (portalLevel.isLoaded(pos)) {  // Only process if chunk is loaded
                         BlockState blockState = portalLevel.getBlockState(pos);
 
@@ -131,7 +137,7 @@ public class ServerTickEvent {
                         if (blockState.is(ModBlocks.VAULT_PORTAL)) {
                             VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(pos);
                             if (portalTileEntity != null && portalTileEntity.getData().isPresent()) {
-                                portalTileEntity.getData().ifPresent(data -> handleModifierRemoval(data, randInt));
+                                handleModifierRemoval(portalTileEntity.getData().get(), randInt);
                             }
                         } else {
                             OverVaults.LOGGER.error("Activated portal was invalidated. Removing.");
@@ -165,14 +171,17 @@ public class ServerTickEvent {
      * @param data The CrystalData used to get the list of modifiers of the portal
      * @param randInt The random value used to remove a modifier from the modifierList via index
      */
-    private static void handleModifierRemoval(CrystalData data, AtomicInteger randInt) {
+    private static void handleModifierRemoval(CrystalData data, int randInt) {
         List<VaultModifierStack> modifierList = data.getModifiers().getList();
 
         if (!modifierList.isEmpty()) {
-            VaultModifierStack modifierStack = modifierList.get(randInt.get());
-
-            if (modifierStack.shrink(1).isEmpty()) {
-                modifierList.remove(modifierStack);
+            if (randInt >= 0 && randInt < modifierList.size()) {
+                VaultModifierStack modifierStack = modifierList.get(randInt);
+                if (modifierStack.shrink(1).isEmpty()) {
+                    modifierList.remove(modifierStack);
+                }
+            } else {
+                OverVaults.LOGGER.error("Random index '{}' is out of bounds for the modifier list size '{}'.", randInt, modifierList.size());
             }
         }
     }
