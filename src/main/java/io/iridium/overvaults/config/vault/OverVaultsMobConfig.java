@@ -41,7 +41,7 @@ public class OverVaultsMobConfig extends Config {
     @Override
     protected void reset() {
         MODIFIERS_TO_REMOVE_UNTIL_TIER_UP = 5;
-        TIER_0_ENTITY = new EntityDataEntry(new ResourceLocation("the_vault:vault_fighter_0"), 20.0F, 2.0F);
+        TIER_0_ENTITY = new EntityDataEntry(new ResourceLocation("the_vault:vault_fighter"), 20.0F, 2.0F);
         TIER_1_ENTITY = new EntityDataEntry(new ResourceLocation("the_vault:vault_fighter_1"), 25.0F, 4.0F);
         TIER_2_ENTITY = new EntityDataEntry(new ResourceLocation("the_vault:vault_fighter_2"), 30.0F, 6.0F);
         TIER_3_ENTITY = new EntityDataEntry(new ResourceLocation("the_vault:vault_fighter_3"), 35.0F, 8.0F);
