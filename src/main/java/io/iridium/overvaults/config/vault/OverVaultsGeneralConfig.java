@@ -18,7 +18,7 @@ public class OverVaultsGeneralConfig extends Config {
 
     @Override
     public String getName() {
-        return "_overvaults_general";
+        return "overvaults_general";
     }
 
     @Override
