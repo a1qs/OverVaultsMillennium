@@ -96,15 +96,14 @@ public class ServerTickEvent {
                 List<BlockPos> portalTilePositions = entityChunkData.getPortalTilePositions();
                 boolean hasModified = false;
 
-                Random random = new Random();
-                int randInt = -1;
-
                 if(portalLevel == null) {
                     OverVaults.LOGGER.error("OverVault Portal Level is null!");
                     return;
                 }
 
-                // Pre-select a random modifier stack index for the first portal
+                List<VaultModifierStack> sharedModifierList = null;
+
+                // Process the first portal tile entity
                 if (!portalTilePositions.isEmpty()) {
                     BlockPos firstPos = portalTilePositions.get(0);
                     VaultPortalTileEntity firstPortalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(firstPos);
@@ -112,9 +111,13 @@ public class ServerTickEvent {
                     if (firstPortalTileEntity != null && firstPortalTileEntity.getData().isPresent()) {
                         List<VaultModifierStack> modifierList = firstPortalTileEntity.getData().get().getModifiers().getList();
                         if (!modifierList.isEmpty()) {
-                            randInt = random.nextInt(modifierList.size());
-
+                            Collections.shuffle(modifierList);
+                            if (modifierList.get(0).shrink(1).isEmpty()) {
+                                modifierList.remove(0);
+                            }
+                            sharedModifierList = new ArrayList<>(modifierList); // Clone the modified list
                             hasModified = true;
+
                             if(portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
                                 portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
                             } else {
@@ -125,30 +128,32 @@ public class ServerTickEvent {
                 }
 
                 // Get the iterator for the portalTilePositions list
-                Iterator<BlockPos> iterator = portalTilePositions.iterator();
+                if(!portalTilePositions.isEmpty()) {
+                    Iterator<BlockPos> iterator = portalTilePositions.iterator();
+                    while (iterator.hasNext()) {
+                        BlockPos pos = iterator.next();
 
-                while (iterator.hasNext()) {
-                    BlockPos pos = iterator.next();
+                        if (portalLevel.isLoaded(pos)) {  // Only process if chunk is loaded
+                            BlockState blockState = portalLevel.getBlockState(pos);
 
-
-                    if (portalLevel.isLoaded(pos)) {  // Only process if chunk is loaded
-                        BlockState blockState = portalLevel.getBlockState(pos);
-
-                        // Check if the block is still a portal block before accessing the tile entity
-                        if (blockState.is(ModBlocks.VAULT_PORTAL)) {
-                            VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(pos);
-                            if (portalTileEntity != null && portalTileEntity.getData().isPresent()) {
-                                handleModifierRemoval(portalTileEntity.getData().get(), randInt);
+                            // Check if the block is still a portal block before accessing the tile entity
+                            if (blockState.is(ModBlocks.VAULT_PORTAL)) {
+                                VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(pos);
+                                if (portalTileEntity != null && portalTileEntity.getData().isPresent() && sharedModifierList != null) {
+                                    List<VaultModifierStack> tileEntityList = portalTileEntity.getData().get().getModifiers().getList();
+                                    tileEntityList.clear();
+                                    tileEntityList.addAll(sharedModifierList);
+                                }
+                            } else {
+                                OverVaults.LOGGER.error("Activated portal was invalidated. Removing.");
+                                // Remove the portal tile entity from the data and the chunk position
+                                iterator.remove();  // Use the iterator to safely remove the current element
+                                entityChunkData.removePortalTileEntityData();
+                                entityChunkData.removeChunkPositionData();
+                                portalData.setActiveState(false);
+                                portalData.setModifiersRemoved(-1);
+                                portalSavedData.setDirty();
                             }
-                        } else {
-                            OverVaults.LOGGER.error("Activated portal was invalidated. Removing.");
-                            // Remove the portal tile entity from the data and the chunk position
-                            iterator.remove();  // Use the iterator to safely remove the current element
-                            entityChunkData.removePortalTileEntityData();
-                            entityChunkData.removeChunkPositionData();
-                            portalData.setActiveState(false);
-                            portalData.setModifiersRemoved(-1);
-                            portalSavedData.setDirty();
                         }
                     }
                 }
@@ -165,28 +170,6 @@ public class ServerTickEvent {
         }
     }
 
-
-
-    /**
-     * Handles the removal of modifiers of Vault Portals
-     *
-     * @param data The CrystalData used to get the list of modifiers of the portal
-     * @param randInt The random value used to remove a modifier from the modifierList via index
-     */
-    private static void handleModifierRemoval(CrystalData data, int randInt) {
-        List<VaultModifierStack> modifierList = data.getModifiers().getList();
-
-        if (!modifierList.isEmpty()) {
-            if (randInt >= 0 && randInt < modifierList.size()) {
-                VaultModifierStack modifierStack = modifierList.get(randInt);
-                if (modifierStack.shrink(1).isEmpty()) {
-                    modifierList.remove(modifierStack);
-                }
-            } else {
-                OverVaults.LOGGER.error("Random index '{}' is out of bounds for the modifier list size '{}'.", randInt, modifierList.size());
-            }
-        }
-    }
 
     /**
      * Helper method to determine if a portal should spawn
@@ -215,7 +198,7 @@ public class ServerTickEvent {
      * Returns a random value for the ticks until modifier removal.
      */
     private static int getRandomRemoveModifierTimer() {
-        return VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SECONDS_UNTIL_MODIFIER_REMOVAL.getRandom();
+        return VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SECONDS_UNTIL_MODIFIER_REMOVAL.getRandom() * 20;
     }
 
 
