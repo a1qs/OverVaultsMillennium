@@ -103,13 +103,37 @@ public class ServerTickEvent {
 
                 List<VaultModifierStack> sharedModifierList = null;
 
-                // Process the first portal tile entity
-                if (!portalTilePositions.isEmpty()) {
-                    BlockPos firstPos = portalTilePositions.get(0);
-                    VaultPortalTileEntity firstPortalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(firstPos);
+                for (int i = 0; i < portalTilePositions.size(); i++) {
+                    BlockPos pos = portalTilePositions.get(i);
 
-                    if (firstPortalTileEntity != null && firstPortalTileEntity.getData().isPresent()) {
-                        List<VaultModifierStack> modifierList = firstPortalTileEntity.getData().get().getModifiers().getList();
+                    if(portalLevel.isLoaded(pos)) {
+                        OverVaults.LOGGER.warn("Position {} is not loaded, cannot modify", pos);
+                        continue;
+                    }
+
+                    BlockState state = portalLevel.getBlockState(pos);
+
+                    if(!state.is(ModBlocks.VAULT_PORTAL)) {
+                        OverVaults.LOGGER.error("Activated portal was invalidated. Removing.");
+                        // Remove the portal tile entity from the data and the chunk position
+                        portalTilePositions.remove(i--);
+                        entityChunkData.removePortalTileEntityData();
+                        entityChunkData.removeChunkPositionData();
+                        portalData.setActiveState(false);
+                        portalData.setModifiersRemoved(-1);
+                        portalSavedData.setDirty();
+                    }
+
+                    VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(pos);
+                    if(portalTileEntity == null || portalTileEntity.getData().isEmpty()) {
+                        OverVaults.LOGGER.warn("Portal BlockEntity doesnt exist or data is empty, skipping");
+                        continue;
+                    }
+
+                    List<VaultModifierStack> modifierList = portalTileEntity.getData().get().getModifiers().getList();
+
+                    if (i == 0) {
+                        // First portal tile entity: shuffle and modify the list
                         if (!modifierList.isEmpty()) {
                             Collections.shuffle(modifierList);
                             if (modifierList.get(0).shrink(1).isEmpty()) {
@@ -118,43 +142,16 @@ public class ServerTickEvent {
                             sharedModifierList = new ArrayList<>(modifierList); // Clone the modified list
                             hasModified = true;
 
-                            if(portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
+                            if (portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
                                 portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
                             } else {
                                 portalSavedData.getFirstActivePortalData().addModifiersRemoved(1);
                             }
                         }
-                    }
-                }
-
-                // Get the iterator for the portalTilePositions list
-                if(!portalTilePositions.isEmpty()) {
-                    Iterator<BlockPos> iterator = portalTilePositions.iterator();
-                    while (iterator.hasNext()) {
-                        BlockPos pos = iterator.next();
-
-                        if (portalLevel.isLoaded(pos)) {  // Only process if chunk is loaded
-                            BlockState blockState = portalLevel.getBlockState(pos);
-
-                            // Check if the block is still a portal block before accessing the tile entity
-                            if (blockState.is(ModBlocks.VAULT_PORTAL)) {
-                                VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(pos);
-                                if (portalTileEntity != null && portalTileEntity.getData().isPresent() && sharedModifierList != null) {
-                                    List<VaultModifierStack> tileEntityList = portalTileEntity.getData().get().getModifiers().getList();
-                                    tileEntityList.clear();
-                                    tileEntityList.addAll(sharedModifierList);
-                                }
-                            } else {
-                                OverVaults.LOGGER.error("Activated portal was invalidated. Removing.");
-                                // Remove the portal tile entity from the data and the chunk position
-                                iterator.remove();  // Use the iterator to safely remove the current element
-                                entityChunkData.removePortalTileEntityData();
-                                entityChunkData.removeChunkPositionData();
-                                portalData.setActiveState(false);
-                                portalData.setModifiersRemoved(-1);
-                                portalSavedData.setDirty();
-                            }
-                        }
+                    } else if (sharedModifierList != null) {
+                        // Subsequent portal tile entities: apply the shared list
+                        modifierList.clear();
+                        modifierList.addAll(sharedModifierList);
                     }
                 }
 
