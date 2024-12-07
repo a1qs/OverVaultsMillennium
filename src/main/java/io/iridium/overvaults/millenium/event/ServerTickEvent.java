@@ -188,7 +188,7 @@ public class ServerTickEvent {
      * Returns a random value for the ticks until portal spawn.
      */
     private static int getRandomTicksForPortalSpawn() {
-        return VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SECONDS_UNTIL_PORTAL_SPAWN.getRandom();
+        return VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SECONDS_UNTIL_PORTAL_SPAWN.getRandom() * 20;
     }
 
     /**
