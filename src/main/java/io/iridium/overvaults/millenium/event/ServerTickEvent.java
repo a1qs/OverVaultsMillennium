@@ -9,7 +9,6 @@ import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.init.ModBlocks;
-import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
