@@ -106,7 +106,7 @@ public class ServerTickEvent {
                 for (int i = 0; i < portalTilePositions.size(); i++) {
                     BlockPos pos = portalTilePositions.get(i);
 
-                    if(portalLevel.isLoaded(pos)) {
+                    if(!portalLevel.isLoaded(pos)) {
                         OverVaults.LOGGER.warn("Position {} is not loaded, cannot modify", pos);
                         continue;
                     }
