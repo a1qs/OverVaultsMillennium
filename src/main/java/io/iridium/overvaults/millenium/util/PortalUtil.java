@@ -54,8 +54,8 @@ public class PortalUtil {
             if(!entityChunkData.getForceloadedChunks().contains(chunkPos)) {
                 level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, true);
                 entityChunkData.addForceloadedChunk(chunkPos.x, chunkPos.z);
-
-                level.getChunkSource().addRegionTicket(TicketType.FORCED, chunkPos, 1, chunkPos);
+                level.setChunkForced(chunkPos.x, chunkPos.z, true);
+                level.getChunkSource().addRegionTicket(TicketType.FORCED, chunkPos, 2, chunkPos);
             }
         }
 

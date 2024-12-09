@@ -38,7 +38,8 @@ public class VaultPortalBlockMixin {
                     savedData.setDirty();
                     entityChunkData.removePortalTileEntityData();
                     for (ChunkPos chunkPos : entityChunkData.getForceloadedChunks()) {
-                        serverLevel.getChunkSource().removeRegionTicket(TicketType.FORCED, chunkPos, 1, chunkPos);
+                        serverLevel.setChunkForced(chunkPos.x, chunkPos.z, false);
+                        serverLevel.getChunkSource().removeRegionTicket(TicketType.FORCED, chunkPos, 2, chunkPos);
                         //entityChunkData.removeChunkPositionData();
                     }
                     entityChunkData.removeChunkPositionData();
