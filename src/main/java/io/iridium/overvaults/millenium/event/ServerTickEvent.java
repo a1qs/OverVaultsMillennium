@@ -105,8 +105,13 @@ public class ServerTickEvent {
                 for (int i = 0; i < portalTilePositions.size(); i++) {
                     BlockPos pos = portalTilePositions.get(i);
 
-                    if(!portalLevel.isLoaded(pos)) {
-                        OverVaults.LOGGER.warn("Position {} is not loaded, cannot modify", pos);
+                    if (!portalLevel.hasChunkAt(pos)) {
+                        OverVaults.LOGGER.warn("Chunk containing position {} is not loaded, attempting to load...", pos);
+                        portalLevel.getChunkSource().getChunk(pos.getX() >> 4, pos.getZ() >> 4, true); // Load the chunk if not loaded
+                    }
+
+                    if (!portalLevel.isLoaded(pos)) {
+                        OverVaults.LOGGER.warn("Position {} is not loaded even after ensuring chunk load, skipping...", pos);
                         continue;
                     }
 
