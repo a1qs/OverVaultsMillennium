@@ -1,5 +1,6 @@
 package io.iridium.overvaults.mixin;
 
+import io.iridium.overvaults.OverVaultConstants;
 import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
@@ -39,7 +40,7 @@ public class VaultPortalBlockMixin {
                     entityChunkData.removePortalTileEntityData();
                     for (ChunkPos chunkPos : entityChunkData.getForceloadedChunks()) {
                         serverLevel.setChunkForced(chunkPos.x, chunkPos.z, false);
-                        serverLevel.getChunkSource().removeRegionTicket(TicketType.FORCED, chunkPos, 2, chunkPos);
+                        serverLevel.getChunkSource().removeRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
                         //entityChunkData.removeChunkPositionData();
                     }
                     entityChunkData.removeChunkPositionData();

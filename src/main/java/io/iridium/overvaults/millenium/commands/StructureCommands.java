@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
+import io.iridium.overvaults.OverVaultConstants;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;
 import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
@@ -206,7 +207,7 @@ public class StructureCommands extends BaseCommand {
         savedData.setDirty();
         for (ChunkPos chunkPos : entityChunkData.getForceloadedChunks()) {
             level.setChunkForced(chunkPos.x, chunkPos.z, false);
-            level.getChunkSource().removeRegionTicket(TicketType.FORCED, chunkPos, 2, chunkPos);
+            level.getChunkSource().removeRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
         }
         entityChunkData.removeChunkPositionData();
 

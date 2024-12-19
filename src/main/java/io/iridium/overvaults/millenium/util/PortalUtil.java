@@ -1,6 +1,7 @@
 package io.iridium.overvaults.millenium.util;
 
 import com.mojang.datafixers.util.Pair;
+import io.iridium.overvaults.OverVaultConstants;
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.config.vault.OverVaultsPortalConfig;
@@ -17,7 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.ChunkPos;
@@ -32,6 +32,8 @@ import java.util.*;
 
 public class PortalUtil {
     private static final Random rand = new Random();
+
+
     public static PortalData getRandomPortalData(List<PortalData> portalDataList) {
         return portalDataList.get(rand.nextInt(portalDataList.size()));
     }
@@ -55,7 +57,7 @@ public class PortalUtil {
                 level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, true);
                 entityChunkData.addForceloadedChunk(chunkPos.x, chunkPos.z);
                 level.setChunkForced(chunkPos.x, chunkPos.z, true);
-                level.getChunkSource().addRegionTicket(TicketType.FORCED, chunkPos, 2, chunkPos);
+                level.getChunkSource().addRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
             }
         }
 
