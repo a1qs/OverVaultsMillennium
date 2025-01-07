@@ -64,13 +64,11 @@ public class TextUtil {
             return new TextComponent(numberStr).withStyle(ChatFormatting.OBFUSCATED);
         }
         // Check the length of the string
-        char lastDigit = charArray[charArray.length-1];
-        char secondToLastDigit = charArray[charArray.length-2];
 
         String prefix = numberStr.substring(0, numberStr.length() - 2);
 
 
-        MutableComponent obfuscatedPart = new TextComponent("" + secondToLastDigit + lastDigit).withStyle(ChatFormatting.OBFUSCATED);
+        MutableComponent obfuscatedPart = new TextComponent("XX").withStyle(ChatFormatting.OBFUSCATED);
 
         return new TextComponent(prefix).append(obfuscatedPart);
     }
