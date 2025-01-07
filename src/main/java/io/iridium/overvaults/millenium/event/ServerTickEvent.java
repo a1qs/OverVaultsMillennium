@@ -48,6 +48,7 @@ public class ServerTickEvent {
 
             if (!portalDataList.isEmpty()) {
                 boolean portalActivated = false;
+                boolean foundPortalOutsideRange = false;
 
                 for (PortalData data : portalDataList) {
                     ServerLevel portalLevel = server.getLevel(data.getDimension());
@@ -63,6 +64,18 @@ public class ServerTickEvent {
                         }
                     }
 
+                    if(VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.getSpawnRadiusForLevel(portalLevel.dimension()) != -1) {
+                        BlockPos portalFrameCenterPos = data.getPortalFrameCenterPos();
+                        double distance = Math.sqrt(Math.pow(portalFrameCenterPos.getX(), 2) + Math.pow(portalFrameCenterPos.getZ(), 2)); // Calculate distance to center of the world
+
+                        if (!(distance <= VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.getSpawnRadiusForLevel(portalLevel.dimension()))) {
+                            foundPortalOutsideRange = true;
+                            continue; // Ignore if it's not in the radius
+                        }
+                    }
+
+
+
                     if (PortalUtil.activatePortal(server, data)) {
                         actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
                         counter = 0;
@@ -71,9 +84,11 @@ public class ServerTickEvent {
                     }
                 }
 
-                if (!portalActivated) {
-                    OverVaults.LOGGER.warn("No valid portals were found to activate. Reset Counter");
+                if (!portalActivated && foundPortalOutsideRange) {
+                    OverVaults.LOGGER.warn("Only found valid portal(s) outside the configured dimension ranges. Reset Counter");
                     counter = 0;
+                } else if (!portalActivated) {
+                    OverVaults.LOGGER.warn("No valid portals were found to activate. Reset Counter");
                 }
             }
         }

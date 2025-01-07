@@ -3,6 +3,8 @@ package io.iridium.overvaults.config.vault;
 import com.google.gson.annotations.Expose;
 import iskallia.vault.config.Config;
 import iskallia.vault.config.entry.IntRangeEntry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 
 public class OverVaultsGeneralConfig extends Config {
     @Expose public boolean RESPECT_WORLD_BORDER;
@@ -11,6 +13,10 @@ public class OverVaultsGeneralConfig extends Config {
     @Expose public boolean PLAY_SOUND_ON_OPEN;
     @Expose public boolean UPDATE_VAULT_COMPASS;
     @Expose public boolean SPAWN_ENTITY_MODIFIER_REMOVAL;
+
+    @Expose public int MAX_RADIUS_PORTAL_SPAWN_OVERWORLD;
+    @Expose public int MAX_RADIUS_PORTAL_SPAWN_NETHER;
+    @Expose public int MAX_RADIUS_PORTAL_SPAWN_END;
 
     @Expose public IntRangeEntry SECONDS_UNTIL_PORTAL_SPAWN;
     @Expose public IntRangeEntry SECONDS_UNTIL_MODIFIER_REMOVAL;
@@ -30,7 +36,20 @@ public class OverVaultsGeneralConfig extends Config {
         UPDATE_VAULT_COMPASS = true;
         SPAWN_ENTITY_MODIFIER_REMOVAL = true;
 
+        MAX_RADIUS_PORTAL_SPAWN_OVERWORLD = 100;
+        MAX_RADIUS_PORTAL_SPAWN_NETHER = 100;
+        MAX_RADIUS_PORTAL_SPAWN_END = 100;
+
         SECONDS_UNTIL_PORTAL_SPAWN = new IntRangeEntry(3000, 9000);
         SECONDS_UNTIL_MODIFIER_REMOVAL = new IntRangeEntry(1200, 1800);
+    }
+
+    public int getSpawnRadiusForLevel(ResourceKey<Level> key) {
+        if(key.equals(Level.OVERWORLD)) {
+            return MAX_RADIUS_PORTAL_SPAWN_OVERWORLD;
+        } else if(key.equals(Level.NETHER)) {
+            return MAX_RADIUS_PORTAL_SPAWN_NETHER;
+        }
+        return MAX_RADIUS_PORTAL_SPAWN_END;
     }
 }
