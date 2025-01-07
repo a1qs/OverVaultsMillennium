@@ -121,7 +121,7 @@ public class PortalUtil {
     private static void notifyPlayers(MinecraftServer server, PortalData data) {
         server.getPlayerList().getPlayers().forEach(player -> {
             if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.PLAY_SOUND_ON_OPEN)
-                player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 0.75f, 1.25f);
+                player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 0.4f, 1.25f);
         });
 
         if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.BROADCAST_IN_CHAT) {
