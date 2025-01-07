@@ -20,6 +20,7 @@ public class CommandRegistry {
     public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         registerCommand(StructureCommands::new, dispatcher);
         registerCommand(LootTableCommands::new, dispatcher);
+        registerCommand(DebugCommands::new, dispatcher);
     }
 
     public static <T extends BaseCommand> T registerCommand(Supplier<T> supplier, CommandDispatcher<CommandSourceStack> dispatcher) {
