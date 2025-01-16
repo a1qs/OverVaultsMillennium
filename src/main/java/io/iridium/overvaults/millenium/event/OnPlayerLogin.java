@@ -25,7 +25,7 @@ public class OnPlayerLogin {
                 MiscUtil.sendCompassInfo(player.getLevel(), data.getPortalFrameCenterPos());
             }
 
-            player.sendMessage(TextUtil.loginComponent(data), ChatType.SYSTEM, Util.NIL_UUID);
+            player.sendMessage(TextUtil.loginComponent(), ChatType.SYSTEM, Util.NIL_UUID);
         }
     }
 }
