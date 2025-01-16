@@ -213,6 +213,7 @@ public class StructureCommands extends BaseCommand {
         }
 
         entityChunkData.removePortalTileEntityData();
+        entityChunkData.setMarkedForRemoval(false);
         data.setActiveState(false);
         data.setModifiersRemoved(-1);
         savedData.setDirty();
