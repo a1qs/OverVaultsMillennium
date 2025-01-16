@@ -154,6 +154,8 @@ public class PortalUtil {
         }
 
         data.setActiveState(true);
+        entityChunkData.setMarkedForRemoval(pairEntry.getFirst().shouldPortalDecay());
+
         entityChunkData.setDirty();
         portalSavedData.setDirty();
         MiscUtil.notifyPlayers(server, data, pairEntry.getFirst().getTranslationComponent());
