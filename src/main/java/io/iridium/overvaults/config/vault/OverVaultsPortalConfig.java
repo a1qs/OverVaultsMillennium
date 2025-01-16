@@ -91,7 +91,6 @@ public class OverVaultsPortalConfig extends Config {
         PortalEntry portalEntry = cfg.PORTAL_LIST.getRandom(Config.rand);
         if (portalEntry != null) {
             CrystalDataEntry.applyData(portalEntry.getCrystalData(), crystal);
-            System.out.println(portalEntry.getCrystalData().getTheme().equals(new PoolCrystalTheme(VaultMod.id("raw"))));
             ResourceLocation curTheme = null;
 
             if(portalEntry.getCrystalData().getTheme() instanceof PoolCrystalTheme theme) {
