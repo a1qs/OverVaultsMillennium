@@ -3,8 +3,8 @@ package io.iridium.overvaults.millenium.util;
 import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.OverVaultConstants;
 import io.iridium.overvaults.OverVaults;
-import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.config.vault.OverVaultsPortalConfig;
+import io.iridium.overvaults.config.vault.entry.PortalEntry;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
@@ -18,8 +18,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -43,9 +41,10 @@ public class PortalUtil {
      *
      * @param level Level used to force-load chunks, fill blocks, get block entities & determine the Crystal Data of the Portal
      * @param data The Portal data which we would like to activate, used to determine size, position & rotation of the Portal
+     * @param crystalData The CrystalData used for the Portal
      * @return A List of Vault Portal tile entities that have been filled
      */
-    public static List<VaultPortalTileEntity> portalTileActivation(ServerLevel level, PortalData data) {
+    public static List<VaultPortalTileEntity> portalTileActivation(ServerLevel level, PortalData data, CrystalData crystalData) {
         List<VaultPortalTileEntity> vaultPortalTileEntities = new ArrayList<>();
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
         Iterable<BlockPos> blocksToFill = data.getSize().getBlockPositions(data.getPortalFrameCenterPos(), data.getRotation());
@@ -62,12 +61,12 @@ public class PortalUtil {
         }
 
 
-        CrystalData originalCrystalData = OverVaultsPortalConfig.getRandomCrystalData(level.dimension());
+
         blocksToFill.forEach(pos -> {
             level.setBlock(pos, ModBlocks.VAULT_PORTAL.defaultBlockState().rotate(data.getRotation()), 3);
             BlockEntity te = level.getBlockEntity(pos);
             if (te instanceof VaultPortalTileEntity portalTE) {
-                CrystalData crystalDataCopy = originalCrystalData.copy();
+                CrystalData crystalDataCopy = crystalData.copy();
                 portalTE.setCrystalData(crystalDataCopy);
                 vaultPortalTileEntities.add(portalTE);
             }
@@ -118,26 +117,13 @@ public class PortalUtil {
                 .toList();
     }
 
-    private static void notifyPlayers(MinecraftServer server, PortalData data) {
-        server.getPlayerList().getPlayers().forEach(player -> {
-            if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.PLAY_SOUND_ON_OPEN)
-                player.getLevel().playSound(null, player.blockPosition(), SoundEvents.END_PORTAL_SPAWN, SoundSource.MASTER, 0.4f, 1.25f);
-        });
-
-        if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.BROADCAST_IN_CHAT) {
-            MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
-
-            if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.UPDATE_VAULT_COMPASS)
-                MiscUtil.sendCompassInfo(server.getLevel(data.getDimension()), data.getPortalFrameCenterPos());
-        }
-    }
-
     public static boolean activatePortal(MinecraftServer server, PortalData data) {
         ServerLevel portalLevel = server.getLevel(data.getDimension());
         if(portalLevel == null) {
             OverVaults.LOGGER.error("Attempted to activate an Overvault portal, but the Level of the portal equals null.");
             return false;
         }
+
         boolean valid = PortalUtil.hasValidFrameBlocks(portalLevel, data);
         if(!valid) {
             OverVaults.LOGGER.error("Attempted to activate Overvault portal, but the given portal had an invalid frame.");
@@ -158,9 +144,10 @@ public class PortalUtil {
 
         }
 
+        Pair<PortalEntry, CrystalData> pairEntry = OverVaultsPortalConfig.getRandomCrystalData(data.getDimension());
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.getServer();
         PortalSavedData portalSavedData = PortalSavedData.getServer();
-        List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(portalLevel, data);
+        List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(portalLevel, data, pairEntry.getSecond());
 
         for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
             entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
@@ -169,7 +156,7 @@ public class PortalUtil {
         data.setActiveState(true);
         entityChunkData.setDirty();
         portalSavedData.setDirty();
-        notifyPlayers(server, data);
+        MiscUtil.notifyPlayers(server, data, pairEntry.getFirst().getTranslationComponent());
         return true;
     }
 
