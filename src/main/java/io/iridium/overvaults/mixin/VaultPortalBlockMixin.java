@@ -11,7 +11,6 @@ import iskallia.vault.item.crystal.CrystalData;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
@@ -63,15 +62,16 @@ public class VaultPortalBlockMixin {
                     if(portal != null && portal.getData().isPresent()) {
                         CrystalData crystalData = portal.getData().get();
                         int vaultLevel;
-                        if (entity instanceof Player player && VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SET_LEVEL_OF_ENTERING_PLAYER_OVERVAULT) {
-                            vaultLevel = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player).getVaultLevel();
-                        } else {
-                            vaultLevel = 0;
 
+                        if(crystalData.getProperties().getLevel().isEmpty()) {
+                            if (entity instanceof Player player && VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.SET_LEVEL_OF_ENTERING_PLAYER_OVERVAULT) {
+                                vaultLevel = PlayerVaultStatsData.get((ServerLevel)player.level).getVaultStats(player).getVaultLevel();
+                            } else {
+                                vaultLevel = 0;
+
+                            }
+                            crystalData.getProperties().setLevel(vaultLevel);
                         }
-
-
-                        crystalData.getProperties().setLevel(vaultLevel);
                     }
                 }
             }
