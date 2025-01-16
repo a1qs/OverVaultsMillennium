@@ -19,6 +19,7 @@ public class BlockEntityChunkSavedData extends SavedData {
     private static final String DATA_NAME = "overvault_persisting_data";
     private final List<BlockPos> portalTilePositions = new ArrayList<>();
     private final Set<ChunkPos> loadedChunks = new HashSet<>();
+    private boolean markedForRemoval = false; // TODO: probably really fragile
 
     public static BlockEntityChunkSavedData load(CompoundTag nbt) {
         BlockEntityChunkSavedData data = new BlockEntityChunkSavedData();
@@ -39,6 +40,8 @@ public class BlockEntityChunkSavedData extends SavedData {
             int chunkZ = dataTag.getInt("ChunkZ");
             data.addForceloadedChunk(chunkX, chunkZ);
         }
+
+        data.setMarkedForRemoval(nbt.getBoolean("MarkedForRemoval"));
 
         return data;
     }
@@ -64,6 +67,7 @@ public class BlockEntityChunkSavedData extends SavedData {
             chunkList.add(chunkTag);
         }
         nbt.put("LoadedChunks", chunkList);
+        nbt.putBoolean("MarkedForRemoval", markedForRemoval);
         return nbt;
     }
 
@@ -96,7 +100,14 @@ public class BlockEntityChunkSavedData extends SavedData {
         return loadedChunks;
     }
 
+    public void setMarkedForRemoval(boolean markedForRemoval) {
+        this.markedForRemoval = markedForRemoval;
+        setDirty();
+    }
 
+    public boolean isMarkedForRemoval() {
+        return markedForRemoval;
+    }
 
     // Data-getters
     public static BlockEntityChunkSavedData getServer() {
