@@ -87,4 +87,18 @@ public class CrystalDataEntry {
         return crystal;
     }
 
+    public static CrystalData applyData(CrystalDataEntry entry) {
+        CrystalData crystal = CrystalData.empty();
+
+        if(entry.objective != null) crystal.setObjective(entry.objective);
+        if(entry.layout != null) crystal.setLayout(entry.layout);
+        if(entry.theme != null) crystal.setTheme(entry.theme);
+        if(entry.time != null) crystal.setTime(entry.time);
+        if(entry.modifiers != null) crystal.getModifiers().getList().addAll(ModifierStackEntry.getModifiers(entry.modifiers));
+        if(entry.vaultLevel != null) crystal.getProperties().setLevel(entry.vaultLevel);
+        if(entry.rollRandomModifiers != null) crystal.getModifiers().setRandomModifiers(entry.rollRandomModifiers);
+
+        return crystal;
+    }
+
 }
