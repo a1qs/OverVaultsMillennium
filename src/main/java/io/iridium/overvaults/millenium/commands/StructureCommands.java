@@ -6,6 +6,9 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.OverVaultConstants;
+import io.iridium.overvaults.config.VaultConfigRegistry;
+import io.iridium.overvaults.config.vault.OverVaultsPortalConfig;
+import io.iridium.overvaults.config.vault.entry.PortalEntry;
 import io.iridium.overvaults.millenium.event.ServerTickEvent;
 import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
@@ -14,8 +17,8 @@ import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
+import iskallia.vault.item.crystal.CrystalData;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -24,7 +27,6 @@ import net.minecraft.network.chat.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
@@ -231,9 +233,16 @@ public class StructureCommands extends BaseCommand {
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(server);
         PortalSavedData portalSavedData = PortalSavedData.get(server);
         List<PortalData> portalDataList = new ArrayList<>(portalSavedData.getPortalData());
+        Random rand = new Random();
 
         for(PortalData data : portalDataList) {
-            List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(server.getLevel(data.getDimension()), data);
+            PortalEntry portalEntry = VaultConfigRegistry.OVERVAULTS_PORTAL_CONFIG.PORTAL_LIST.getRandom(rand);
+            if(portalEntry == null) {
+                continue;
+            }
+
+            Pair<PortalEntry, CrystalData> pairEntry = OverVaultsPortalConfig.getRandomCrystalData(data.getDimension());
+            List<VaultPortalTileEntity> portalTileEntities = PortalUtil.portalTileActivation(server.getLevel(data.getDimension()), data, pairEntry.getSecond());
 
             for (VaultPortalTileEntity portalTileEntity : portalTileEntities) {
                 entityChunkData.addPortalTileEntity(portalTileEntity.getBlockPos());
@@ -242,7 +251,7 @@ public class StructureCommands extends BaseCommand {
             data.setActiveState(true);
             entityChunkData.setDirty();
             portalSavedData.setDirty();
-            context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(data, false), ChatType.SYSTEM, Util.NIL_UUID);
+            MiscUtil.notifyPlayers(server, data, pairEntry.getFirst().getTranslationComponent());
         }
 
         return 0;
