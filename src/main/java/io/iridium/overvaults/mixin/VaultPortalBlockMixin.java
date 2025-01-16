@@ -43,6 +43,7 @@ public class VaultPortalBlockMixin {
                         //entityChunkData.removeChunkPositionData();
                     }
                     entityChunkData.removeChunkPositionData();
+                    entityChunkData.setMarkedForRemoval(false);
                 }
             }
         }
