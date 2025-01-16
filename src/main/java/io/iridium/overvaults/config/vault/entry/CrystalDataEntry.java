@@ -11,14 +11,13 @@ import java.util.List;
 
 public class CrystalDataEntry {
 
-    @Expose private CrystalObjective objective;
-    @Expose private CrystalLayout layout;
-    @Expose private CrystalTheme theme;
-    @Expose private List<ModifierStackEntry> modifiers;
-    @Expose private CrystalTime time;
-
-    @Expose private Integer vaultLevel;
-    @Expose private Boolean rollRandomModifiers;
+    @Expose private final CrystalObjective objective;
+    @Expose private final CrystalLayout layout;
+    @Expose private final CrystalTheme theme;
+    @Expose private final List<ModifierStackEntry> modifiers;
+    @Expose private final CrystalTime time;
+    @Expose private final Integer vaultLevel;
+    @Expose private final Boolean rollRandomModifiers;
 
     public CrystalDataEntry(CrystalObjective objective, CrystalLayout layout, CrystalTheme theme, List<ModifierStackEntry> modifiers, CrystalTime time, int vaultLevel, boolean rollRandomModifiers) {
         this.objective = objective;
@@ -34,48 +33,31 @@ public class CrystalDataEntry {
         return objective;
     }
 
-    public void setObjective(CrystalObjective objective) {
-        this.objective = objective;
-    }
-
     public CrystalLayout getLayout() {
         return layout;
-    }
-
-    public void setLayout(CrystalLayout layout) {
-        this.layout = layout;
     }
 
     public CrystalTheme getTheme() {
         return theme;
     }
 
-    public void setTheme(CrystalTheme theme) {
-        this.theme = theme;
+    public List<ModifierStackEntry> getModifiers() {
+        return modifiers;
     }
 
     public CrystalTime getTime() {
         return time;
     }
 
-    public void setTime(CrystalTime time) {
-        this.time = time;
-    }
-
-    public List<ModifierStackEntry> getModifiers() {
-        return modifiers;
-    }
-
-
     public Integer getVaultLevel() {
         return vaultLevel;
     }
 
-    public void setVaultLevel(Integer vaultLevel) {
-        this.vaultLevel = vaultLevel;
+    public Boolean getRollRandomModifiers() {
+        return rollRandomModifiers;
     }
 
-    public static CrystalData applyData(CrystalDataEntry entry, CrystalData crystal) {
+    public static void applyData(CrystalDataEntry entry, CrystalData crystal) {
         if(entry.objective != null) crystal.setObjective(entry.objective);
         if(entry.layout != null) crystal.setLayout(entry.layout);
         if(entry.theme != null) crystal.setTheme(entry.theme);
@@ -83,8 +65,6 @@ public class CrystalDataEntry {
         if(entry.modifiers != null) crystal.getModifiers().getList().addAll(ModifierStackEntry.getModifiers(entry.modifiers));
         if(entry.vaultLevel != null) crystal.getProperties().setLevel(entry.vaultLevel);
         if(entry.rollRandomModifiers != null) crystal.getModifiers().setRandomModifiers(entry.rollRandomModifiers);
-
-        return crystal;
     }
 
     public static CrystalData applyData(CrystalDataEntry entry) {
