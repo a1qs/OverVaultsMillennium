@@ -6,6 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import io.iridium.overvaults.OverVaultConstants;
+import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.VaultConfigRegistry;
 import io.iridium.overvaults.config.vault.OverVaultsPortalConfig;
 import io.iridium.overvaults.config.vault.entry.PortalEntry;
@@ -203,6 +204,14 @@ public class StructureCommands extends BaseCommand {
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(level);
         PortalSavedData savedData = PortalSavedData.get(level);
 
+        for(BlockPos pos : entityChunkData.getPortalTilePositions()) {
+            if(level.isLoaded(pos)) {
+                level.removeBlock(pos, false);
+            } else {
+                OverVaults.LOGGER.error("Position {} not loaded when deactivating portal!", pos);
+            }
+        }
+
         entityChunkData.removePortalTileEntityData();
         data.setActiveState(false);
         data.setModifiersRemoved(-1);
@@ -214,8 +223,7 @@ public class StructureCommands extends BaseCommand {
         entityChunkData.removeChunkPositionData();
 
 
-        //TODO:
-        context.getSource().sendSuccess(new TextComponent("Removed data, did not remove tile-entities. (TBD)"), true);
+        context.getSource().sendSuccess(new TextComponent("Removed active OverVault on position " + data.getPortalFrameCenterPos()).withStyle(ChatFormatting.YELLOW), true);
         return 0;
     }
 
@@ -228,7 +236,7 @@ public class StructureCommands extends BaseCommand {
         return 0;
     }
 
-    private int activateAllPortals(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private int activateAllPortals(CommandContext<CommandSourceStack> context){
         MinecraftServer server = context.getSource().getServer();
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(server);
         PortalSavedData portalSavedData = PortalSavedData.get(server);
