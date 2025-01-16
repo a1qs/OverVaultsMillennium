@@ -34,59 +34,11 @@ public class TextUtil {
         return TextUtil.getPortalComponent(index, data).append(tpComponent);
     }
 
-    public static MutableComponent getPortalAppearComponent(PortalData data, boolean obfuscation) {
-        if (obfuscation) {
-            return new TextComponent("A mysterious energy has appeared in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                    .append(dimensionComponent(data.getDimension()))
-                    .append(new TextComponent(" at ").withStyle(ChatFormatting.DARK_PURPLE))
-                    .append(obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()).withStyle(ChatFormatting.LIGHT_PURPLE));
-        } else {
-            return new TextComponent("A mysterious energy has appeared in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                    .append(dimensionComponent(data.getDimension()))
-                    .append(new TextComponent(" at ").withStyle(ChatFormatting.DARK_PURPLE))
-                    .append(new TextComponent("" + data.getPortalFrameCenterPos().getX()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent("" + data.getPortalFrameCenterPos().getY()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent("" + data.getPortalFrameCenterPos().getZ()).withStyle(ChatFormatting.LIGHT_PURPLE));
-        }
+    public static MutableComponent loginComponent() {
+        return new TranslatableComponent("overvaults.portal.login");
     }
 
-    public static MutableComponent obfuscateLastTwoDigits(int number) {
-        // Convert the number to a string
-        String numberStr = Integer.toString(number);
-        char[] charArray = numberStr.toCharArray();
-        if(numberStr.length() == 1) {
-            return new TextComponent(numberStr).withStyle(ChatFormatting.OBFUSCATED);
-        }
-        // Check the length of the string
-
-        String prefix = numberStr.substring(0, numberStr.length() - 2);
-
-
-        MutableComponent obfuscatedPart = new TextComponent("XX").withStyle(ChatFormatting.OBFUSCATED);
-
-        return new TextComponent(prefix).append(obfuscatedPart);
-    }
-
-    public static MutableComponent loginComponent(PortalData data) {
-        return new TextComponent("You sense that a mysterious energy is resonating in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                .append(dimensionComponent(data.getDimension()))
-                .append(new TextComponent( " at ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()))
-                .append(", ")
-                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()))
-                .append(", ")
-                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()))
-                .withStyle(ChatFormatting.RESET)
-                .withStyle(ChatFormatting.LIGHT_PURPLE);
-    }
-
-    private static MutableComponent dimensionComponent(ResourceKey<Level> dimension) {
+    public static MutableComponent dimensionComponent(ResourceKey<Level> dimension) {
         if(dimension.equals(Level.OVERWORLD)) {
             return new TextComponent("the Overworld").withStyle(ChatFormatting.YELLOW);
         } else if (dimension.equals(Level.NETHER)) {
@@ -94,7 +46,7 @@ public class TextUtil {
         } else if (dimension.equals(Level.END)) {
             return new TextComponent("the End").withStyle(ChatFormatting.DARK_AQUA);
         } else {
-            OverVaults.LOGGER.warn("Chosen dimension for a new active portal was not the overworld, nether, or end.");
+            OverVaults.LOGGER.error("Chosen dimension for a new active portal was not the overworld, nether, or end.");
             return new TextComponent("Report this").withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.DARK_RED);
 
         }
