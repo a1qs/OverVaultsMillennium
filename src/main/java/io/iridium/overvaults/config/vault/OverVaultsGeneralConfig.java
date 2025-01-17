@@ -1,10 +1,14 @@
 package io.iridium.overvaults.config.vault;
 
 import com.google.gson.annotations.Expose;
+import iskallia.vault.VaultMod;
 import iskallia.vault.config.Config;
 import iskallia.vault.config.entry.IntRangeEntry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class OverVaultsGeneralConfig extends Config {
     @Expose public boolean RESPECT_WORLD_BORDER;
@@ -20,6 +24,7 @@ public class OverVaultsGeneralConfig extends Config {
 
     @Expose public IntRangeEntry SECONDS_UNTIL_PORTAL_SPAWN;
     @Expose public IntRangeEntry SECONDS_UNTIL_MODIFIER_REMOVAL;
+    @Expose public List<String> BLACKLISTED_MODIFIERS_TO_REMOVE = new ArrayList<>();
 
 
     @Override
@@ -42,6 +47,8 @@ public class OverVaultsGeneralConfig extends Config {
 
         SECONDS_UNTIL_PORTAL_SPAWN = new IntRangeEntry(3000, 9000);
         SECONDS_UNTIL_MODIFIER_REMOVAL = new IntRangeEntry(1200, 1800);
+        BLACKLISTED_MODIFIERS_TO_REMOVE.add(VaultMod.id("locked").toString());
+
     }
 
     public int getSpawnRadiusForLevel(ResourceKey<Level> key) {
