@@ -34,26 +34,12 @@ public class TextUtil {
         return TextUtil.getPortalComponent(index, data).append(tpComponent);
     }
 
-    public static MutableComponent getPortalAppearComponent(PortalData data, boolean obfuscation) {
-        if (obfuscation) {
-            return new TextComponent("A mysterious energy has appeared in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                    .append(dimensionComponent(data.getDimension()))
-                    .append(new TextComponent(" at ").withStyle(ChatFormatting.DARK_PURPLE))
-                    .append(obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()).withStyle(ChatFormatting.LIGHT_PURPLE));
-        } else {
-            return new TextComponent("A mysterious energy has appeared in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                    .append(dimensionComponent(data.getDimension()))
-                    .append(new TextComponent(" at ").withStyle(ChatFormatting.DARK_PURPLE))
-                    .append(new TextComponent("" + data.getPortalFrameCenterPos().getX()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent("" + data.getPortalFrameCenterPos().getY()).withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent(", ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                    .append(new TextComponent("" + data.getPortalFrameCenterPos().getZ()).withStyle(ChatFormatting.LIGHT_PURPLE));
-        }
+    public static MutableComponent getPortalAppearComponent(PortalData data) {
+        return new TextComponent("A mysterious energy has appeared in ").withStyle(ChatFormatting.LIGHT_PURPLE)
+                .append(dimensionComponent(data.getDimension()))
+                .append(new TextComponent(" at ").withStyle(ChatFormatting.DARK_PURPLE));
+
+
     }
 
     public static MutableComponent obfuscateLastTwoDigits(int number) {

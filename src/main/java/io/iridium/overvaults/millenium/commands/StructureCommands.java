@@ -226,7 +226,7 @@ public class StructureCommands extends BaseCommand {
         return 0;
     }
 
-    private int activateAllPortals(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+    private int activateAllPortals(CommandContext<CommandSourceStack> context) {
         MinecraftServer server = context.getSource().getServer();
         BlockEntityChunkSavedData entityChunkData = BlockEntityChunkSavedData.get(server);
         PortalSavedData portalSavedData = PortalSavedData.get(server);
@@ -242,7 +242,7 @@ public class StructureCommands extends BaseCommand {
             data.setActiveState(true);
             entityChunkData.setDirty();
             portalSavedData.setDirty();
-            context.getSource().getPlayerOrException().sendMessage(TextUtil.getPortalAppearComponent(data, false), ChatType.SYSTEM, Util.NIL_UUID);
+            MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data));
         }
 
         return 0;

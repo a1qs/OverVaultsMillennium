@@ -125,7 +125,7 @@ public class PortalUtil {
         });
 
         if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.BROADCAST_IN_CHAT) {
-            MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data, true));
+            MiscUtil.broadcast(TextUtil.getPortalAppearComponent(data));
 
             if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.UPDATE_VAULT_COMPASS)
                 MiscUtil.sendCompassInfo(server.getLevel(data.getDimension()), data.getPortalFrameCenterPos());
