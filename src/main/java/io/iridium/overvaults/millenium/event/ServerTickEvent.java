@@ -51,6 +51,11 @@ public class ServerTickEvent {
                 boolean foundPortalOutsideRange = false;
 
                 for (PortalData data : portalDataList) {
+
+                    if(data.getPortalFrameCenterPos().getY() < 64) {
+                        continue; // skip portals that are lower than y 64
+                    }
+
                     ServerLevel portalLevel = server.getLevel(data.getDimension());
                     if (portalLevel == null) {
                         OverVaults.LOGGER.error("Level {} equals null. Please report this.", data.getDimension());
@@ -63,6 +68,8 @@ public class ServerTickEvent {
                             continue; // If the border is not within the portal bounds; skip this portal
                         }
                     }
+
+
 
                     if(VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.getSpawnRadiusForLevel(portalLevel.dimension()) != -1) {
                         BlockPos portalFrameCenterPos = data.getPortalFrameCenterPos();
