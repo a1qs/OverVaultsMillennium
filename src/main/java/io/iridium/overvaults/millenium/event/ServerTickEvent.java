@@ -169,16 +169,26 @@ public class ServerTickEvent {
                         // First portal tile entity: shuffle and modify the list
                         if (!modifierList.isEmpty()) {
                             Collections.shuffle(modifierList);
-                            if (modifierList.get(0).shrink(1).isEmpty()) {
-                                modifierList.remove(0);
-                            }
-                            sharedModifierList = new ArrayList<>(modifierList); // Clone the modified list
-                            hasModified = true;
+                            Iterator<VaultModifierStack> it = modifierList.iterator();
 
-                            if (portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
-                                portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
-                            } else {
-                                portalSavedData.getFirstActivePortalData().addModifiersRemoved(1);
+                            while (it.hasNext()) {
+                                VaultModifierStack modifier = it.next();
+
+                                if(!VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.BLACKLISTED_MODIFIERS_TO_REMOVE.contains(modifier.getModifierId().toString())) {
+                                    if (modifier.shrink(1).isEmpty()) {
+                                        it.remove();
+                                    }
+
+                                    sharedModifierList = new ArrayList<>(modifierList); // Clone the modified list
+                                    hasModified = true;
+
+                                    if (portalSavedData.getFirstActivePortalData().getModifiersRemoved() == -1) {
+                                        portalSavedData.getFirstActivePortalData().setModifiersRemoved(0);
+                                    } else {
+                                        portalSavedData.getFirstActivePortalData().addModifiersRemoved(1);
+                                    }
+                                    break;
+                                }
                             }
                         }
                     } else if (sharedModifierList != null) {
