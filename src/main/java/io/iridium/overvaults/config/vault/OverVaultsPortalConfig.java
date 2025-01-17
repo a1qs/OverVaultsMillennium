@@ -52,7 +52,7 @@ public class OverVaultsPortalConfig extends Config {
                 new BingoCrystalObjective(),
                 new ClassicInfiniteCrystalLayout(1),
                 new PoolCrystalTheme(VaultMod.id("raw")),
-                List.of(new ModifierStackEntry(VaultMod.id("item_quantity"), 16), new ModifierStackEntry(VaultMod.id("soul_boost"), 64)),
+                List.of(new ModifierStackEntry(VaultMod.id("locked"), 1), new ModifierStackEntry(VaultMod.id("soul_boost"), 4)),
                 new ValueCrystalTime(IntRoll.ofConstant(1800)),
                 20,
                 false
