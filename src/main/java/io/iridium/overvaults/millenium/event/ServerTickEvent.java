@@ -1,7 +1,9 @@
 package io.iridium.overvaults.millenium.event;
 
+import io.iridium.overvaults.OverVaultConstants;
 import io.iridium.overvaults.OverVaults;
 import io.iridium.overvaults.config.VaultConfigRegistry;
+import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.util.PortalUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
@@ -10,8 +12,10 @@ import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.init.ModBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.border.WorldBorder;
@@ -51,6 +55,11 @@ public class ServerTickEvent {
                 boolean foundPortalOutsideRange = false;
 
                 for (PortalData data : portalDataList) {
+                    if(data.getPortalFrameCenterPos().getY() < 64) {
+                        continue; // Skip portals that are lower than y 64
+                    }
+
+
                     ServerLevel portalLevel = server.getLevel(data.getDimension());
                     if (portalLevel == null) {
                         OverVaults.LOGGER.error("Level {} equals null. Please report this.", data.getDimension());
@@ -137,7 +146,12 @@ public class ServerTickEvent {
                         // Remove the portal tile entity from the data and the chunk position
                         portalTilePositions.remove(i--);
                         entityChunkData.removePortalTileEntityData();
-                        entityChunkData.removeChunkPositionData();
+
+                        for (ChunkPos chunkPos : entityChunkData.getForceloadedChunks()) {
+                            level.setChunkForced(chunkPos.x, chunkPos.z, false);
+                            level.getChunkSource().removeRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
+                        }
+                        entityChunkData.removeForceLoadedChunkData();
                         portalData.setActiveState(false);
                         portalData.setModifiersRemoved(-1);
                         portalSavedData.setDirty();
@@ -178,6 +192,29 @@ public class ServerTickEvent {
                     int removed = portalData.getModifiersRemoved();
                     int step = removed / VaultConfigRegistry.OVERVAULTS_MOB_CONFIG.MODIFIERS_TO_REMOVE_UNTIL_TIER_UP; // Technical step, ignoring max cap, for bosses
                     VaultConfigRegistry.OVERVAULTS_MOB_CONFIG.addPortalEntityToWorld(portalLevel, step, portalData);
+
+                    if(step == 5 && entityChunkData.isMarkedForRemoval()) {
+                        for(BlockPos pos : entityChunkData.getPortalTilePositions()) {
+                            if(level.isLoaded(pos)) {
+                                level.removeBlock(pos, false);
+                            } else {
+                                OverVaults.LOGGER.error("Position {} not loaded when deactivating portal!", pos);
+                            }
+                        }
+
+                        entityChunkData.removePortalTileEntityData();
+                        entityChunkData.setMarkedForRemoval(false);
+                        portalData.setActiveState(false);
+                        portalData.setModifiersRemoved(-1);
+                        portalSavedData.setDirty();
+                        for (ChunkPos chunkPos : entityChunkData.getForceloadedChunks()) {
+                            level.setChunkForced(chunkPos.x, chunkPos.z, false);
+                            level.getChunkSource().removeRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
+                        }
+                        entityChunkData.removeForceLoadedChunkData();
+
+                        MiscUtil.broadcast(new TranslatableComponent("overvaults.portal.decay"));
+                    }
                 }
 
                 activePortalTickCounter = 0; // Reset the counter after execution
