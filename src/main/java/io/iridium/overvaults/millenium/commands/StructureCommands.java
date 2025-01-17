@@ -221,7 +221,7 @@ public class StructureCommands extends BaseCommand {
             level.setChunkForced(chunkPos.x, chunkPos.z, false);
             level.getChunkSource().removeRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
         }
-        entityChunkData.removeChunkPositionData();
+        entityChunkData.removeForceLoadedChunkData();
 
 
         context.getSource().sendSuccess(new TextComponent("Removed active OverVault on position " + data.getPortalFrameCenterPos()).withStyle(ChatFormatting.YELLOW), true);

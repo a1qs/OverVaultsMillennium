@@ -42,7 +42,7 @@ public class VaultPortalBlockMixin {
                         serverLevel.getChunkSource().removeRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
                         //entityChunkData.removeChunkPositionData();
                     }
-                    entityChunkData.removeChunkPositionData();
+                    entityChunkData.removeForceLoadedChunkData();
                     entityChunkData.setMarkedForRemoval(false);
                 }
             }

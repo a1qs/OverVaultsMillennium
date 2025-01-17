@@ -87,7 +87,7 @@ public class BlockEntityChunkSavedData extends SavedData {
         setDirty();
     }
 
-    public void removeChunkPositionData() {
+    public void removeForceLoadedChunkData() {
         loadedChunks.clear();
         setDirty();
     }
