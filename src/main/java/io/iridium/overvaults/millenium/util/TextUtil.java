@@ -36,8 +36,7 @@ public class TextUtil {
 
     public static MutableComponent getPortalAppearComponent(PortalData data) {
         return new TextComponent("A mysterious energy has appeared in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                .append(dimensionComponent(data.getDimension()))
-                .append(new TextComponent(" at ").withStyle(ChatFormatting.DARK_PURPLE));
+                .append(dimensionComponent(data.getDimension()));
 
 
     }
@@ -61,15 +60,7 @@ public class TextUtil {
 
     public static MutableComponent loginComponent(PortalData data) {
         return new TextComponent("You sense that a mysterious energy is resonating in ").withStyle(ChatFormatting.LIGHT_PURPLE)
-                .append(dimensionComponent(data.getDimension()))
-                .append(new TextComponent( " at ").withStyle(ChatFormatting.LIGHT_PURPLE))
-                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getX()))
-                .append(", ")
-                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getY()))
-                .append(", ")
-                .append(TextUtil.obfuscateLastTwoDigits(data.getPortalFrameCenterPos().getZ()))
-                .withStyle(ChatFormatting.RESET)
-                .withStyle(ChatFormatting.LIGHT_PURPLE);
+                .append(dimensionComponent(data.getDimension()));
     }
 
     private static MutableComponent dimensionComponent(ResourceKey<Level> dimension) {
