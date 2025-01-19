@@ -21,9 +21,13 @@ import iskallia.vault.item.crystal.theme.PoolCrystalTheme;
 import iskallia.vault.item.crystal.theme.ValueCrystalTheme;
 import iskallia.vault.item.crystal.time.ValueCrystalTime;
 import iskallia.vault.util.data.WeightedList;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +38,7 @@ public class OverVaultsPortalConfig extends Config {
     private static final Random RANDOM = new Random();
     @Expose public float CHANCE_OF_NETHER_THEME_IN_NETHER;
     @Expose public float CHANCE_OF_VOID_THEME_IN_END;
+    @Expose public WeightedList<ResourceLocation> DIMENSION_CHOOSE_LIST = new WeightedList<>();
     @Expose public WeightedList<PortalEntry> PORTAL_LIST = new WeightedList<>();
     @Expose public List<ResourceLocation> NETHER_VAULT_THEMES = new ArrayList<>();
     @Expose public List<ResourceLocation> VOID_VAULT_THEMES = new ArrayList<>();
@@ -47,6 +52,10 @@ public class OverVaultsPortalConfig extends Config {
     protected void reset() {
         CHANCE_OF_NETHER_THEME_IN_NETHER = 0.10F;
         CHANCE_OF_VOID_THEME_IN_END = 0.075F;
+
+        DIMENSION_CHOOSE_LIST.add(Level.OVERWORLD.location(), 1);
+        DIMENSION_CHOOSE_LIST.add(Level.NETHER.location(), 1);
+        DIMENSION_CHOOSE_LIST.add(Level.END.location(), 10000);
 
         CrystalDataEntry entry0 = new CrystalDataEntry(
                 new BingoCrystalObjective(),
@@ -126,5 +135,10 @@ public class OverVaultsPortalConfig extends Config {
 
 
         return Pair.of(portalEntry, crystal);
+    }
+
+
+    public ServerLevel getLevel(MinecraftServer srv)  {
+        return srv.getLevel(ResourceKey.create(Registry.DIMENSION_REGISTRY, this.DIMENSION_CHOOSE_LIST.getRandom(Config.rand)));
     }
 }

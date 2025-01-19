@@ -12,7 +12,9 @@ import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.init.ModBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -47,6 +49,7 @@ public class ServerTickEvent {
 
         // Check if the counter has reached the limit for portal spawning
         if (shouldSpawnPortal(actlTicksForPortalSpawn)) {
+            ResourceKey<Level> preferredDimension = VaultConfigRegistry.OVERVAULTS_PORTAL_CONFIG.getLevel(server).dimension();
             List<PortalData> portalDataList = new ArrayList<>(portalSavedData.getPortalData());
             Collections.shuffle(portalDataList);
 
@@ -54,9 +57,14 @@ public class ServerTickEvent {
                 boolean portalActivated = false;
                 boolean foundPortalOutsideRange = false;
 
+                // First pass: Look for portals in the preferred dimension
                 for (PortalData data : portalDataList) {
-                    if(data.getPortalFrameCenterPos().getY() < 64) {
-                        continue; // Skip portals that are lower than y 64
+                    if (!data.getDimension().equals(preferredDimension)) {
+                        continue; // Skip portals not in the preferred dimension
+                    }
+
+                    if(data.getPortalFrameCenterPos().getY() < 64 && data.getDimension().equals(Level.OVERWORLD)) {
+                        continue; // Skip portals that are lower than y 64 and in the Overworld
                     }
 
 
@@ -90,6 +98,46 @@ public class ServerTickEvent {
                         counter = 0;
                         portalActivated = true;
                         break; // Successfully activated a portal, no need to check others
+                    }
+                }
+
+                // Second pass: If no portals were activated in the preferred dimension, check any dimension
+                if (!portalActivated) {
+                    MiscUtil.broadcast(new TextComponent("Didnt find one initially"));
+                    for (PortalData data : portalDataList) {
+                        if (data.getPortalFrameCenterPos().getY() < 64) {
+                            continue; // Skip portals that are lower than y 64
+                        }
+
+                        ServerLevel portalLevel = server.getLevel(data.getDimension());
+                        if (portalLevel == null) {
+                            OverVaults.LOGGER.error("Level {} equals null on second pass? Please report this.", data.getDimension());
+                            continue; // Skip this portal
+                        }
+
+                        if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.RESPECT_WORLD_BORDER) {
+                            WorldBorder worldBorder = level.getWorldBorder();
+                            if (!worldBorder.isWithinBounds(data.getPortalFrameCenterPos())) {
+                                continue; // If the border is not within the portal bounds; skip this portal
+                            }
+                        }
+
+                        if (VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.getSpawnRadiusForLevel(portalLevel.dimension()) != -1) {
+                            BlockPos portalFrameCenterPos = data.getPortalFrameCenterPos();
+                            double distance = Math.sqrt(Math.pow(portalFrameCenterPos.getX(), 2) + Math.pow(portalFrameCenterPos.getZ(), 2)); // Calculate distance to center of the world
+
+                            if (!(distance <= VaultConfigRegistry.OVERVAULTS_GENERAL_CONFIG.getSpawnRadiusForLevel(portalLevel.dimension()))) {
+                                foundPortalOutsideRange = true;
+                                continue; // Ignore if it's not in the radius
+                            }
+                        }
+
+                        if (PortalUtil.activatePortal(server, data)) {
+                            actlTicksForPortalSpawn = getRandomTicksForPortalSpawn();
+                            counter = 0;
+                            portalActivated = true;
+                            break; // Successfully activated a portal, no need to check others
+                        }
                     }
                 }
 
