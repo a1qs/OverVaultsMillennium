@@ -14,6 +14,8 @@ import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.VaultMessage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
@@ -26,6 +28,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.ArrayList;
@@ -210,6 +213,12 @@ public class StructureCommands extends BaseCommand {
             level.getChunkSource().removeRegionTicket(OverVaultConstants.OVERVAULT_TICKET, chunkPos, 2, chunkPos);
         }
         entityChunkData.removeChunkPositionData();
+
+        for(ServerPlayer sP : srv.getPlayerList().getPlayers()) {
+            if(!sP.getLevel().dimension().location().getNamespace().equals("the_vault")) {
+                ModNetwork.CHANNEL.sendTo(new VaultMessage.Unload(MiscUtil.OVERVAULT_COMPASS_V), sP.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+            }
+        }
 
 
         //TODO:

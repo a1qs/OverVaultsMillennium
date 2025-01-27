@@ -17,6 +17,9 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 public class MiscUtil {
+
+    public static final Vault OVERVAULT_COMPASS_V = new Vault();
+
     /**
      * Method to inform clients in the same Level as the Overvault about it being opened, sending Vault Compass info
      *
@@ -25,7 +28,7 @@ public class MiscUtil {
      */
     public static void sendCompassInfo(ServerLevel level, BlockPos pos) {
         level.getPlayers(serverPlayer -> true).forEach(serverPlayer -> {
-            Vault vault = new Vault();
+
             WorldManager worldManager = new WorldManager();
             ClassicPortalLogic portalLogic = new ClassicPortalLogic();
             iskallia.vault.core.vault.PortalData.List portalDataList = new iskallia.vault.core.vault.PortalData.List();
@@ -39,10 +42,10 @@ public class MiscUtil {
             portalLogic.set(PortalLogic.DATA, portalDataList);
             worldManager.set(WorldManager.PORTAL_LOGIC, portalLogic);
             worldManager.set(WorldManager.FACING, Direction.NORTH);
-            vault.set(Vault.WORLD, worldManager);
-            vault.set(Vault.VERSION, Version.latest());
-            vault.set(Vault.MODIFIERS, new Modifiers());
-            ModNetwork.CHANNEL.sendTo(new VaultMessage.Sync(serverPlayer, vault, SyncMode.FULL), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
+            OVERVAULT_COMPASS_V.set(Vault.WORLD, worldManager);
+            OVERVAULT_COMPASS_V.set(Vault.VERSION, Version.latest());
+            OVERVAULT_COMPASS_V.set(Vault.MODIFIERS, new Modifiers());
+            ModNetwork.CHANNEL.sendTo(new VaultMessage.Sync(serverPlayer, OVERVAULT_COMPASS_V, SyncMode.FULL), serverPlayer.connection.getConnection(), NetworkDirection.PLAY_TO_CLIENT);
         });
     }
 
