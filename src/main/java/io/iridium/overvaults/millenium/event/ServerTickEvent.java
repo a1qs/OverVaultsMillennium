@@ -107,7 +107,7 @@ public class ServerTickEvent {
 
                 // Second pass: If no portals were activated in the preferred dimension, check any dimension
                 if (!portalActivated) {
-                    MiscUtil.broadcast(new TextComponent("Didnt find one initially"));
+                    OverVaults.LOGGER.warn("Did not find a valid Portal in the preferred dimension");
                     for (PortalData data : portalDataList) {
                         if (data.getPortalFrameCenterPos().getY() < 64) {
                             continue; // Skip portals that are lower than y 64
