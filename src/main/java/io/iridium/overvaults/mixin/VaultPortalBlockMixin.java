@@ -2,21 +2,27 @@ package io.iridium.overvaults.mixin;
 
 import io.iridium.overvaults.OverVaultConstants;
 import io.iridium.overvaults.config.VaultConfigRegistry;
+import io.iridium.overvaults.millenium.util.MiscUtil;
 import io.iridium.overvaults.millenium.world.BlockEntityChunkSavedData;
 import io.iridium.overvaults.millenium.world.PortalData;
 import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.VaultPortalBlock;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
+import iskallia.vault.init.ModNetwork;
 import iskallia.vault.item.crystal.CrystalData;
+import iskallia.vault.network.message.VaultMessage;
 import iskallia.vault.world.data.PlayerVaultStatsData;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.server.ServerLifecycleHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,6 +50,12 @@ public class VaultPortalBlockMixin {
                     }
                     entityChunkData.removeForceLoadedChunkData();
                     entityChunkData.setMarkedForRemoval(false);
+
+                    for(ServerPlayer sP : ServerLifecycleHooks.getCurrentServer().getPlayerList().getPlayers()) {
+                        if(!sP.getLevel().dimension().location().getNamespace().equals("the_vault")) {
+                            ModNetwork.CHANNEL.sendTo(new VaultMessage.Unload(MiscUtil.OVERVAULT_COMPASS_V), sP.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                        }
+                    }
                 }
             }
         }

@@ -11,12 +11,15 @@ import io.iridium.overvaults.millenium.world.PortalSavedData;
 import iskallia.vault.block.entity.VaultPortalTileEntity;
 import iskallia.vault.core.vault.modifier.VaultModifierStack;
 import iskallia.vault.init.ModBlocks;
+import iskallia.vault.init.ModNetwork;
+import iskallia.vault.network.message.VaultMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,6 +27,7 @@ import net.minecraft.world.level.border.WorldBorder;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.server.ServerLifecycleHooks;
 
 import java.util.*;
@@ -203,6 +207,12 @@ public class ServerTickEvent {
                         portalData.setActiveState(false);
                         portalData.setModifiersRemoved(-1);
                         portalSavedData.setDirty();
+
+                        for(ServerPlayer sP : server.getPlayerList().getPlayers()) {
+                            if(!sP.getLevel().dimension().location().getNamespace().equals("the_vault")) {
+                                ModNetwork.CHANNEL.sendTo(new VaultMessage.Unload(MiscUtil.OVERVAULT_COMPASS_V), sP.connection.connection, NetworkDirection.PLAY_TO_CLIENT);
+                            }
+                        }
                     }
 
                     VaultPortalTileEntity portalTileEntity = (VaultPortalTileEntity) portalLevel.getBlockEntity(pos);
