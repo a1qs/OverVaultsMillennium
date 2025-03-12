@@ -55,7 +55,7 @@ public class OverVaultsPortalConfig extends Config {
 
         DIMENSION_CHOOSE_LIST.add(Level.OVERWORLD.location(), 1);
         DIMENSION_CHOOSE_LIST.add(Level.NETHER.location(), 1);
-        DIMENSION_CHOOSE_LIST.add(Level.END.location(), 10000);
+        DIMENSION_CHOOSE_LIST.add(Level.END.location(), 1);
 
         CrystalDataEntry entry0 = new CrystalDataEntry(
                 new BingoCrystalObjective(),
@@ -130,9 +130,6 @@ public class OverVaultsPortalConfig extends Config {
         } else {
             OverVaults.LOGGER.error("Found invalid portal data inside of '{}' config!", VaultConfigRegistry.OVERVAULTS_PORTAL_CONFIG.getName());
         }
-
-
-
 
         return Pair.of(portalEntry, crystal);
     }
